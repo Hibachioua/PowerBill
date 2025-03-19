@@ -20,7 +20,7 @@
                 <div class="col-md-6">
                     <h1>Bienvenue sur votre espace de facturation électrique</h1>
                     <p>Générez z vos factures d'électricité facilement avec PowerBill.</p>
-                    <a href="/login.php" class="btn btn-dark">Commencer</a>
+                    <a href="login.php" class="btn btn-dark">Commencer</a>
                 </div>
                 <div class="col-md-6">
                     <img src="assets/images/Hero5.png" alt="Hero Image" class="img-fluid">

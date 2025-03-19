@@ -36,7 +36,7 @@
                             <a class="nav-link px-3" href="support.php">Support</a>
                         </li>
                         <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
-                            <a class="btn btn-dark" href="/login.php">Espace Client</a>
+                            <a class="btn btn-dark" href="login.php">Espace Client</a>
                         </li>
                     </ul>
                 </div>
