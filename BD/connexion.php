@@ -2,7 +2,7 @@
 class DB {
     static public function connect() {
         $serveur       = "localhost";
-        $port          = "3307"; 
+        $port          = "3308"; 
         $utilisateur   = "root";
         $motdepasse    = "";
         $basededonnees = "powerbill";
