@@ -1,4 +1,4 @@
 <?php
-require_once "IHM/index.php";
+header("Location: IHM/index.php");
 exit;
 ?>

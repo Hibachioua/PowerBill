@@ -1,5 +1,5 @@
 <?php
-// Classe LoginController pour gérer les fonctionnalités d'authentification
+
 class LoginController {
     private $connexion;
     

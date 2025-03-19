@@ -49,7 +49,7 @@
                                 <input type="checkbox" id="remember" name="remember">
                                 <label for="remember">Se souvenir de moi</label>
                             </div>
-                            <a href="forgot-password.php" class="forgot-password">Mot de passe oublié?</a>
+                            
                         </div>
                         
                         <button type="submit" class="btn btn-primary w-100 mb-3">
