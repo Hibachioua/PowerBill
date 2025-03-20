@@ -16,11 +16,11 @@
             <input type="text" id="clientID" name="clientID" required>
         </div>
         <div class="form-group">
-            <label for="meterValue">METER VALUE</label>
+            <label for="meterValue">Entrez la valeur du compteur:</label>
             <input type="text" id="meterValue" name="meterValue" required>
         </div>
         <div class="form-group">
-            <label for="counterPicture">PICTURE OF THE COUNTER</label>
+            <label for="counterPicture">Entrez la photo de votre compteur:</label>
             <input type="file" id="counterPicture" name="counterPicture" accept="image/jpeg, image/png, image/jpg, image/pdf" required>
         </div>
         <button type="submit" class="btn btn-dark">SEND</button>
