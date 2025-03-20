@@ -1,3 +1,4 @@
+<?php include "header.php"; ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -7,45 +8,29 @@
     <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
-    <header>
-        <h1>PowerBill</h1>
-        <nav>
-            <a href="#">Enter bill</a>
-            <a href="#">Home</a>
-            <a href="#">Profile</a>
-            <a href="#">View Bill</a>
-            <a href="#" class="active">Complaint</a>
-            <a href="#">Logout</a>
-        </nav>
-    </header>
-    
     <main>
-        <div class="complaint-container">
-            <h2>Votre réclamation</h2>
-            <form id="complaintForm" action="../Traitement/traitement_reclamation.php" method="POST">
-                <label for="clientID">ID CLIENT</label>
-                <input type="text" id="clientID" name="clientID" required> <!-- Ajout du name -->
+    <div class="complaint-container">
+    <h2>Votre réclamation</h2>
+    <form id="complaintForm" action="../Traitement/traitement_reclamation.php" method="POST">
+        <label for="clientID">ID CLIENT</label>
+        <input type="text" id="clientID" name="clientID" required>
 
-                <label>Type de réclamation :</label>
-                <div class="radio-group">
-                    <input type="radio" name="complaintType" value="fuite interne" checked> Fuite interne
-                    <input type="radio" name="complaintType" value="fuite externe"> Fuite externe
-                    <input type="radio" name="complaintType" value="facture"> Facture
-                    <input type="radio" name="complaintType" value="autre"> Autre
-                </div>
-                
-                <label for="description">Description :</label>
-                <textarea id="description" name="description" rows="4" required></textarea> <!-- Ajout du name -->
-                
-                <button type="submit">Envoyer</button>
-            </form>
+        <label>Type de réclamation :</label>
+        <div class="radio-group">
+            <label><input type="radio" name="complaintType" value="fuite interne" checked> Fuite interne</label>
+            <label><input type="radio" name="complaintType" value="fuite externe"> Fuite externe</label>
+            <label><input type="radio" name="complaintType" value="facture"> Facture</label>
+            <label><input type="radio" name="complaintType" value="autre"> Autre</label>
         </div>
+        
+        <label for="description">Description :</label>
+        <textarea id="description" name="description" rows="4" required></textarea>
+        
+        <button type="submit">Envoyer</button>
+    </form>
+</div>
     </main>
-
-    <footer>
-        <p>&copy; 2025 PowerBill. Tous droits réservés.</p>
-    </footer>
-    
+<?php include "footer.php"; ?>
     <script src="script.js"></script>
 </body>
 </html>

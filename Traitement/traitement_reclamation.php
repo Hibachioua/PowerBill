@@ -1,11 +1,10 @@
 <?php
-// Inclure la connexion à la base de données et la fonction d'insertion
-include '../BD/connexion.php';
-include '../BD/requetes_reclamation.php';
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+require_once "../BD/connexion.php";
+require_once '../BD/requetes_reclamation.php';
 
-// Vérifier si la méthode HTTP est bien POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
     // Vérifier si tous les champs nécessaires sont envoyés via POST
     if (isset($_POST['clientID'], $_POST['complaintType'], $_POST['description']) &&
         !empty($_POST['clientID']) && !empty($_POST['complaintType']) && !empty($_POST['description'])) {
@@ -14,6 +13,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $id_client = intval($_POST['clientID']); // Assurez-vous que l'ID client est un entier
         $type_reclamation = htmlspecialchars($_POST['complaintType']); // Protéger contre les XSS
         $description = htmlspecialchars($_POST['description']); // Protéger contre les XSS
+
+        echo "ID Client: $id_client<br>";
+        echo "Type de réclamation: $type_reclamation<br>";
+        echo "Description: $description<br>";
 
         // Connexion à la base de données via la classe DB
         try {
@@ -43,4 +46,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     echo "Méthode non autorisée.";
 }
 ?>
-
