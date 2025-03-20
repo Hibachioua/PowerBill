@@ -698,3 +698,55 @@ footer {
 .complaint-container button:hover {
     background-color: #0a5bb1;
 }
+.consumption-container {
+    max-width: 700px;
+    margin: 50px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    text-align: center;
+}
+
+.consumption-container h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.consumption-container .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.consumption-container .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+.consumption-container .form-group input[type="text"],
+.consumption-container .form-group input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.consumption-container .btn-dark {
+    width: 100%;
+    background-color: #0a5bb1;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.consumption-container .btn-dark:hover {
+    background-color: #0a5bb1;
+}
