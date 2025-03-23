@@ -1,40 +1,61 @@
 <?php
-// Inclure la connexion à la base de données et les fonctions nécessaires
-include_once(__DIR__ . '/../BD/connexion.php');
-include_once(__DIR__ . '/../BD/liste_facture_BD.php');
 
-// Vérifier si une facture doit être payée
-if (isset($_GET['facture_id']) && is_numeric($_GET['facture_id'])) {
-    $facture_id = $_GET['facture_id'];
+if (empty($_GET['action'])) {
+    header('Location: ../IHM/ListeFactures.php');
+    exit;  // Assure-toi que le script s'arrête après la redirection
+}
 
-    // Mettre à jour l'état de la facture à "payée"
-    $result = updateFacturePayee($facture_id);
+header('Content-Type: application/json'); // Toujours retourner du JSON
 
-    // Si le paiement est réussi
-    if ($result) {
-        // Récupérer toutes les factures non payées après paiement
-        $factures = getNonPayeFactures();
+require_once "../BD/FactureModel.php";
+require_once "../BD/connexion.php";
 
-        // Encoder les factures en JSON pour les passer à la page de redirection
-        $factures_json = urlencode(json_encode($factures));
+$model = new FactureModel();
 
-        // Rediriger vers la page ListeFactures.php avec les nouvelles données de factures
-        header('Location: ../IHM/ListeFactures.php?factures=' . $factures_json . '&paiement_succes=true');
-    } else {
-        // Rediriger avec un message d'erreur
-        $error_message = urlencode("Erreur lors du paiement de la facture.");
-        header('Location: ../IHM/ListeFactures.php?error=' . $error_message);
-    }
+// Récupérer les factures non payées (GET)
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'getFactures') {
+    $factures = $model->getNonPayes();
+    echo json_encode($factures);
     exit;
 }
 
-// Si aucun paiement, récupérer toutes les factures non payées
-$factures = getNonPayeFactures();
+// Mettre à jour le statut de paiement d'une facture (GET)
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'payerFacture') {
+    if (isset($_GET['factureID'])) {
+        $factureID = $_GET['factureID'];
+        if ($model->updateFacturePayee($factureID)) {
+            // Retourner une réponse JSON
+            echo json_encode(["status" => "success"]);
+            exit;
+        } else {
+            echo json_encode(["status" => "error", "message" => "Échec de la mise à jour de la facture."]);
+            exit;
+        }
+    } else {
+        echo json_encode(["status" => "error", "message" => "Facture ID manquant."]);
+        exit;
+    }
+}
 
-// Rediriger vers la page avec les factures au format JSON
-$factures_json = urlencode(json_encode($factures));
-header('Location: ../IHM/ListeFactures.php?factures=' . $factures_json);
+// Rediriger vers la page des factures payées (GET)
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'consulterAnciennesFactures') {
+    header('Location: ../IHM/ListeFacturesPayees.php');
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'getFacturesPayees') {
+    $factures = $model->getFacturesPayees();
+    echo json_encode($factures);
+    exit;
+}
+
+// Rediriger vers la page ListeFactures.php (GET)
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'retour') {
+    header('Location: ../IHM/ListeFactures.php');
+    exit;
+}
+
+// Si aucune action n'est reconnue
+echo json_encode(["status" => "error", "message" => "Action non valide."]);
 exit;
-?>
-
-
+?>  

@@ -9,7 +9,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/style.css">
-    <link rel="stylesheet" href="assets/styleListeFacture.css">
+    <link rel="stylesheet" href="assets/styleListeFacture.css?v=1.0">
+
+
 </head>
 <body>
     <div class="containerListe">
@@ -17,7 +19,7 @@
             <h2>Vos Factures</h2>
         </div>
         <div class="btn-container">
-            <button class="btn btn-primary"><i class="fas fa-folder-open"></i> Consulter les anciennes factures</button>
+            <button id="consulterAnciennesFactures" class="btn btn-primary"><i class="fas fa-folder-open"></i> Consulter les anciennes factures</button>
         </div>
         <div class="table-container">
             <table>
@@ -40,85 +42,103 @@
         </div>
     </div>
     <?php include('footer.php'); ?>
-    <script> 
-    // Fonction pour récupérer les factures depuis l'URL
-    function getFacturesFromURL() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const facturesJson = urlParams.get('factures');
-        return facturesJson ? JSON.parse(decodeURIComponent(facturesJson)) : [];
-    }
 
-    // Fonction pour afficher les factures dans le tableau
-// Fonction pour afficher les factures dans le tableau
-function afficherFactures() {
-    const factures = getFacturesFromURL();
-    const tbody = document.getElementById('facture-table-body');
-    tbody.innerHTML = '';  // Vider le tableau avant de le remplir à nouveau
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+$(document).ready(function () {
+    // Fonction pour charger les factures depuis le serveur
+    function chargerFactures() {
+        $.ajax({
+            url: '../Traitement/traitement_listefacture.php',
+            type: 'GET',
+            data: { action: 'getFactures' },
+            dataType: 'json',
+            success: function (data) {
+                console.log("Données reçues : ", data); 
+                if (data && data.length > 0) {
+                    let html = '';
+                    data.forEach(facture => {
+                        html += `<tr>
+                            <td>${facture.Mois} / ${facture.Annee}</td>
+                            <td>${facture.ID_Compteur}</td>
+                            <td>${facture.Nom} ${facture.Prénom}</td>
+                            <td>${facture.Date_émission}</td>
+                            <td>${facture.Qté_consommé} kWh</td>
+                            <td>${facture.Prix_TTC} DH</td>
+                           
+                         
+                            <td>
+                                <button class="payer-btn" data-id="${facture.ID_Facture}">Payer</button>
+                            </td>
+                            <td>
+                                <button class="download-btn" data-id="${facture.ID_Facture}">Télécharger </button>
+                            </td>
 
-    if (factures.length > 0) {
-        factures.forEach(facture => {
-            const row = document.createElement('tr');
-            row.id = `facture-${facture.ID_Facture}`;
-            
-            // Vérification du statut de paiement
-            let etatFacture = facture.Statut_paiement === "non paye"
-                ? `<button onclick="payerFacture(${facture.ID_Facture})" class="btn btn-success">
-                        <i class="fas fa-check-circle"></i> Payé
-                   </button>`
-                : `<span class="badge bg-success">Payé</span>`;
 
-            row.innerHTML = `
-                <td>${facture.Mois}/${facture.Annee}</td>
-                <td>${facture.ID_Compteur}</td>
-                <td>${facture.Nom} ${facture.Prenom}</td>
-                <td>${facture.Date_émission}</td>
-                <td>${facture.Consommation}</td>
-                <td>${facture.Prix_TTC} €</td>
-                <td>${etatFacture}</td>
-                <td>
-                    <button class="btn btn-danger">
-                        <i class="fas fa-file-pdf"></i> Télécharger
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(row);
+                        </tr>`;
+                    });
+                    console.log("HTML généré : ", html);
+                    $('#facture-table-body').html(html);  // Ajoute les données dans le tableau
+                } else {
+                    $('#facture-table-body').html('<tr><td colspan="8">Aucune facture trouvée.</td></tr>');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Erreur AJAX:", error);  // Affiche l'erreur si elle se produit
+            }
         });
-    } else {
-        tbody.innerHTML = '<tr><td colspan="8">Aucune facture non payée trouvée.</td></tr>';
     }
-}
 
+    // Charger les factures au chargement de la page
+    chargerFactures();
 
-    // Fonction pour payer une facture
-    function payerFacture(factureID) {
-        // Assurez-vous que le chemin est correct
-        window.location.href = `http://localhost/Powerbill/Traitement/traitement_listefacture.php?facture_id=${factureID}`;
-    }
-    function appelerPageTraitement() {
-    fetch('http://localhost/Powerbill/Traitement/traitement_listefacture.php', {
-        method: 'POST',  // Utiliser POST pour envoyer des données
-        body: JSON.stringify({ action: 'traiter' }),  // Optionnel, envoyer des données si nécessaire
-        headers: {
-            'Content-Type': 'application/json'
+    // Rafraîchir toutes les 5 secondes pour récupérer les dernières données
+    setInterval(chargerFactures, 5000);
+
+    // Gérer le paiement d'une facture
+    $(document).on('click', '.payer-btn', function () {
+    console.log("Bouton Payer cliqué !");
+    let factureID = $(this).data('id');
+    console.log("ID de la facture : ", factureID);
+
+    // Utiliser GET au lieu de POST
+    $.ajax({
+        url: '../Traitement/traitement_listefacture.php',
+        type: 'GET',
+        data: { action: 'payerFacture', factureID: factureID },
+        dataType: 'json',
+        success: function (response) {
+            console.log("Réponse du serveur : ", response);
+            if (response.status === "success") {
+               
+                chargerFactures(); // Rafraîchir la liste des factures
+            } else {
+                alert("Erreur lors du paiement de la facture.");
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Erreur AJAX : ", error);
+            console.error("Statut de la requête : ", status);
+            console.error("Réponse du serveur : ", xhr.responseText);
+            alert("Une erreur s'est produite lors du paiement.");
         }
-    })
-    .then(response => response.text())
-    .then(data => {
-        console.log('Traitement terminé:', data);
-    })
-    .catch(error => {
-        console.error('Erreur lors du traitement:', error);
     });
-}
-
-// Appel au traitement sans redirection
-window.onload = function() {
-    afficherFactures();
-    appelerPageTraitement();  // Appel du traitement sans rediriger
-};
+});
 
 
+    // Gérer le téléchargement de la facture
+    $(document).on('click', '.download-btn', function () {
+        let factureID = $(this).data('id');
+        window.location.href = `../Traitement/telecharger_facture.php?factureID=${factureID}`;  // Redirige pour télécharger la facture
+    });
 
-</script>
+
+    // Gérer le bouton "Consulter les anciennes factures"
+    $('#consulterAnciennesFactures').on('click', function () {
+        window.location.href = '../Traitement/traitement_listefacture.php?action=consulterAnciennesFactures';
+    });
+});
+
+    </script>
 </body>
 </html>

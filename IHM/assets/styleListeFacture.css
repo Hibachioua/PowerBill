@@ -55,23 +55,37 @@ h2 {
     background-color: rgb(71, 6, 184);
 }
 
-/* Bouton succès spécifique dans la page */
-.containerListe .btn-success {
+/* Style pour le bouton Payer */
+.payer-btn {
     background-color: #f5a729;
     color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
 }
-.containerListe .btn-success:hover {
+
+.payer-btn:hover {
     background-color: rgb(223, 137, 0);
 }
 
-/* Bouton danger spécifique dans la page */
-.containerListe .btn-danger {
+/* Style pour le bouton Télécharger la facture */
+.download-btn {
     background-color: #3c83e7;
     color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
 }
-.containerListe .btn-danger:hover {
+
+.download-btn:hover {
     background-color: #0c4da7;
 }
+
+
 
 .table-container {
     overflow-x: auto;
