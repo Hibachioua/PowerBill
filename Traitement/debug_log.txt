@@ -1,0 +1,9 @@
+Script accessed at 2025-03-24 14:34:47
+POST data: Array
+(
+    [email] => client1@example.com
+    [password] => 1234
+)
+
+Database error: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)
+Authentication failed. Redirecting back to login

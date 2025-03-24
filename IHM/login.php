@@ -1,11 +1,14 @@
-<?php include "header.php"; ?>
-
+<?php
+// Démarrer la session pour afficher les erreurs potentielles
+session_start();
+include "header.php";
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PowerBill - login</title>
+    <title>PowerBill - Connexion</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="assets/style.css">
@@ -28,6 +31,7 @@
                     </div>
                     <?php endif; ?>
                     
+                    <!-- Notez le changement dans l'action du formulaire -->
                     <form action="../Traitement/login_traitement.php" method="POST" class="login-form">
                         <div class="form-group mb-3">
                             <label for="email"><i class="fas fa-envelope"></i> Adresse email</label>
@@ -49,24 +53,22 @@
                                 <input type="checkbox" id="remember" name="remember">
                                 <label for="remember">Se souvenir de moi</label>
                             </div>
-                            
                         </div>
                         
-                        <button type="submit" class="btn btn-primary w-100 mb-3">
+                        <button type="submit" name="login_submit" class="btn btn-primary w-100 mb-3">
                             <i class="fas fa-sign-in-alt"></i> Se connecter
                         </button>
                     </form>
                     
                     <div class="login-footer text-center mt-4">
-                        <p>Vous n'avez pas de compte? <a href="register.php">Créer un compte</a></p>
+                        <p>Vous avez oublié votre identifiant ? <a href="index.php">Contact us</a></p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
-<?php include "footer.php"; ?>
-<body>
+
 <script>
     function togglePasswordVisibility() {
         const passwordInput = document.getElementById('password');
@@ -84,3 +86,6 @@
     }
 </script>
 
+<?php include "footer.php"; ?>
+</body>
+</html>

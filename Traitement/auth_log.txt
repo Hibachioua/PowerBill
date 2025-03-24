@@ -1,0 +1,8 @@
+--- 2025-03-24 15:08:50 ---
+POST data: Array
+(
+    [email] => client1@example.com
+    [password] => 1234
+)
+
+Accès direct sans soumission de formulaire
