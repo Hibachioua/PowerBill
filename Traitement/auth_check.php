@@ -1,14 +1,13 @@
 <?php
-// auth_check.php - À placer dans le dossier Traitement ou Controllers
+
 require_once "../BD/connexion.php";
 require_once "../BD/LoginController.php";
 
-// Démarrer la session si ce n'est pas déjà fait
+
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Créer l'instance du contrôleur
 $db = DB::connect();
 $loginController = new LoginController($db);
 
@@ -24,7 +23,6 @@ if (!$isLoggedIn) {
     }
 }
 
-// Si l'utilisateur n'est toujours pas connecté, rediriger vers la page de connexion
 if (!$isLoggedIn) {
     header("Location: ../IHM/login.php");
     exit();
