@@ -92,20 +92,20 @@
     <div class="containerform">
         <h2>Votre Réclamation</h2>
         
-        <form>
+        <form action="../Traitement/traitement_reclamation.php?action=envoyer_reclamation" method="POST">
             <label>ID CLIENT</label>
-            <input type="password" value="**********" disabled>
-            
+            <input type="text" name="id_client" required>
+
             <label>Type de réclamation</label>
             <div class="radio-group">
-                <label><input type="radio" name="complaint" checked> Fuite interne</label>
-                <label><input type="radio" name="complaint"> Fuite externe</label>
-                <label><input type="radio" name="complaint"> Facture</label>
-                <label><input type="radio" name="complaint"> Autre...</label>
+                <label><input type="radio" name="type_reclamation" value="Fuite interne" checked> Fuite interne</label>
+                <label><input type="radio" name="type_reclamation" value="Fuite externe"> Fuite externe</label>
+                <label><input type="radio" name="type_reclamation" value="Facture"> Facture</label>
+                <label><input type="radio" name="type_reclamation" value="Autre"> Autre...</label>
             </div>
             
             <label>Description:</label>
-            <textarea rows="3"></textarea>
+            <textarea name="description" rows="3" required></textarea>
             
             <button type="submit">Envoyer</button>
         </form>
