@@ -9,23 +9,61 @@
 </head>
 <body>
 <div class="consumption-container">
-    <h2>Enter your consumption of the month</h2>
-    <form id="monthlyConsumptionForm" action="#" method="POST" enctype="multipart/form-data">
+    <h2>Enregistrez votre consommation du mois</h2>
+    
+    <!-- Affichage des messages d'erreur/succès -->
+    <?php if (isset($_GET['message'])): ?>
+        <div class="alert <?= isset($_GET['success']) ? 'alert-success' : 'alert-danger' ?>">
+            <?= htmlspecialchars(urldecode($_GET['message'])) ?>
+        </div>
+    <?php endif; ?>
+    
+    <form id="monthlyConsumptionForm" action="../Traitement/consommation_traitement.php" method="POST" enctype="multipart/form-data">
         <div class="form-group">
-            <label for="clientID">ID CLIENT</label>
-            <input type="text" id="clientID" name="clientID" required>
+            <label for="clientID">Identifiant Client</label>
+            <input type="text" id="clientID" name="clientID" required 
+                   pattern="[0-9]+" title="Veuillez entrer uniquement des chiffres">
         </div>
         <div class="form-group">
-            <label for="meterValue">Entrez la valeur du compteur:</label>
-            <input type="text" id="meterValue" name="meterValue" required>
+            <label for="meterValue">Valeur du compteur (kWh):</label>
+            <input type="number" id="meterValue" name="meterValue" required 
+                   step="0.01" min="0" placeholder="123.45">
         </div>
         <div class="form-group">
-            <label for="counterPicture">Entrez la photo de votre compteur:</label>
-            <input type="file" id="counterPicture" name="counterPicture" accept="image/jpeg, image/png, image/jpg, image/pdf" required>
+            <label for="counterPicture">Photo du compteur:</label>
+            <input type="file" id="counterPicture" name="counterPicture" 
+                   accept="image/*,.pdf" required
+                   onchange="previewImage(this)">
+            <div id="imagePreview" style="margin-top: 10px;"></div>
         </div>
-        <button type="submit" class="btn btn-dark">SEND</button>
+        <button type="submit" class="btn btn-dark">ENVOYER</button>
     </form>
 </div>
-</body>
 
+<script>
+function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            if (input.files[0].type.includes('image')) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '200px';
+                img.style.maxHeight = '200px';
+                preview.appendChild(img);
+            } else {
+                preview.innerHTML = '<p>Fichier PDF sélectionné</p>';
+            }
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+</body>
+</html>
 <?php include "footer.php"; ?>
