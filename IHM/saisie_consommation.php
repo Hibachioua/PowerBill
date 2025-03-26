@@ -18,28 +18,31 @@
         </div>
     <?php endif; ?>
     
-    <form id="monthlyConsumptionForm" action="../Traitement/consommation_traitement.php" method="POST" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="clientID">Identifiant Client</label>
-            <input type="text" id="clientID" name="clientID" required 
-                   pattern="[0-9]+" title="Veuillez entrer uniquement des chiffres">
-        </div>
-        <div class="form-group">
-            <label for="meterValue">Valeur du compteur (kWh):</label>
-            <input type="number" id="meterValue" name="meterValue" required 
-                   step="0.01" min="0" placeholder="123.45">
-        </div>
-        <div class="form-group">
-            <label for="counterPicture">Photo du compteur:</label>
-            <input type="file" id="counterPicture" name="counterPicture" 
-                   accept="image/*,.pdf" required
-                   onchange="previewImage(this)">
-            <div id="imagePreview" style="margin-top: 10px;"></div>
-        </div>
-        <button type="submit" class="btn btn-dark">ENVOYER</button>
-    </form>
-</div>
+    <!-- Dans saisie_consommation.php -->
+    <form id="consumptionForm" action="../Traitement/consommation_traitement.php" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
+    <!-- Notez bien method="POST" et enctype -->
+    
+    <div class="form-group">
+        <label for="ID_Compteur">ID Compteur:</label>
+        <input type="number" id="ID_Compteur" name="ID_Compteur" required>
+    </div>
 
+        <input type="hidden" id="Mois" name="Mois" min="1" max="12" required>
+        <input type="hidden" id="Annee" name="Annee" min="2020" max="2030" required>
+    
+    <div class="form-group">
+        <label for="Qté_consommé">Quantité Consommée (kWh):</label>
+        <input type="number" id="Qté_consommé" name="Qté_consommé" step="0.01" min="0" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="counterPicture">Photo du compteur:</label>
+        <input type="file" id="counterPicture" name="counterPicture" accept="image/*" required>
+    </div>
+    
+    <button type="submit" class="btn">Enregistrer</button>
+</form>
+    </div>
 <script>
 function previewImage(input) {
     const preview = document.getElementById('imagePreview');
@@ -63,6 +66,13 @@ function previewImage(input) {
         reader.readAsDataURL(input.files[0]);
     }
 }
+
+function validateForm() {
+    // Désactiver le bouton pour éviter les doubles soumissions
+    document.getElementById('submitBtn').disabled = true;
+    return true; // Retourner true pour permettre la soumission
+}
+
 </script>
 </body>
 </html>

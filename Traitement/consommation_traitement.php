@@ -1,63 +1,98 @@
 <?php
+// Activation du reporting d'erreurs
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// Get the PDO connection from connexion.php
-$pdo = require_once "../BD/connexion.php";
-require_once "../BD/requetes_comsommation.php";
+// Debug initial
+error_log("[DEBUG] Méthode: " . $_SERVER['REQUEST_METHOD']);
+error_log("[DEBUG] POST: " . print_r($_POST, true));
+error_log("[DEBUG] FILES: " . print_r($_FILES, true));
 
-// Verify we have a valid connection
-if (!$pdo instanceof PDO) {
-    die("Database connection failed");
+// Vérification stricte de la méthode
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    error_log("[ERREUR] Méthode non POST reçue");
+    header("Location: ../IHM/saisie_consommation.php?error=method_not_allowed");
+    exit();
 }
 
-$clientID = $_POST['clientID'] ?? null;
-$meterValue = $_POST['meterValue'] ?? null;
-$picture = $_FILES['counterPicture'] ?? null;
+// Vérification de l'enctype
+if (empty($_POST) && empty($_FILES)) {
+    error_log("[ERREUR] Données POST/FILES vides - enctype manquant ?");
+    header("Location: ../IHM/saisie_consommation.php?error=missing_form_data");
+    exit();
+}
 
-if ($clientID !== null && $meterValue !== null && isset($picture["error"]) && $picture["error"] === UPLOAD_ERR_OK) {
+require_once __DIR__ . '/../BD/connexion.php';
+require_once __DIR__ . '/../BD/requetes_consommation.php';
+
+try {
+    // Connexion DB
+    $pdo = DB::connect();
+    if (!$pdo) {
+        throw new Exception("Échec de la connexion à la base de données");
+    }
+
+    // Validation des données avec valeurs système pour mois/année
+    $data = [
+        'ID_Compteur' => filter_input(INPUT_POST, 'ID_Compteur', FILTER_VALIDATE_INT),
+        'Mois' => date('n'), // Mois courant (1-12)
+        'Annee' => date('Y'), // Année courante
+        'Qté_consommé' => filter_input(INPUT_POST, 'Qté_consommé', FILTER_VALIDATE_FLOAT)
+    ];
+
+    // Validation des champs
+    foreach ($data as $key => $value) {
+        if ($value === false || $value === null) {
+            throw new Exception("Champ $key invalide ou manquant");
+        }
+    }
+
+    // Validation fichier
+    if (!isset($_FILES['counterPicture']) || $_FILES['counterPicture']['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception("Erreur lors de l'upload du fichier (code: " . ($_FILES['counterPicture']['error'] ?? 'NULL') . ")");
+    }
+
+    // Configuration upload
     $uploadDir = __DIR__ . '/../uploads/';
-    
-    // Create directory if it doesn't exist
-    if (!file_exists($uploadDir)) {
-        if (!mkdir($uploadDir, 0755, true)) {
-            die("Could not create upload directory");
-        }
+    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) {
+        throw new Exception("Impossible de créer le dossier d'upload");
     }
-    
-    // Verify directory is writable
-    if (!is_writable($uploadDir)) {
-        die("Upload directory is not writable");
-    }
-    
-    // Sanitize filename
-    $filename = uniqid() . '_' . preg_replace('/[^a-zA-Z0-9\.\-_]/', '_', basename($picture["name"]));
-    $targetFilePath = $uploadDir . $filename;
 
-    if (move_uploaded_file($picture["tmp_name"], $targetFilePath)) {
-        $relativePath = 'uploads/' . $filename;
-        
-        try {
-            if (insererConsommation($pdo, $clientID, $meterValue, $relativePath)) {
-                header("Location: ../Vue/success.php");
-                exit();
-            } else {
-                unlink($targetFilePath);
-                header("Location: ../Vue/error.php?message=Insert failed");
-                exit();
-            }
-        } catch (PDOException $e) {
-            unlink($targetFilePath);
-            header("Location: ../Vue/error.php?message=Database error");
-            exit();
-        }
-    } else {
-        header("Location: ../Vue/error.php?message=File upload failed");
-        exit();
+    // Sécurisation du nom de fichier
+    $originalName = basename($_FILES['counterPicture']['name']);
+    $safeName = preg_replace('/[^a-zA-Z0-9\.\-_]/', '_', $originalName);
+    $filename = uniqid() . '_' . $safeName;
+    $targetPath = $uploadDir . $filename;
+
+    // Déplacement fichier
+    if (!move_uploaded_file($_FILES['counterPicture']['tmp_name'], $targetPath)) {
+        throw new Exception("Échec du déplacement du fichier uploadé");
     }
-} else {
-    $errorCode = $picture["error"] ?? 'unknown';
-    header("Location: ../Vue/error.php?message=Invalid data&code=$errorCode");
+
+    // Insertion en base
+    if (!insererConsommation(
+        $pdo,
+        $data['ID_Compteur'],
+        $data['Mois'],
+        $data['Annee'],
+        $data['Qté_consommé'],
+        'uploads/' . $filename
+    )) {
+        throw new Exception("Échec de l'insertion en base de données");
+    }
+
+    // Succès
+    header("Location: ../IHM/saisie_consommation.php?success=1");
+    exit();
+
+} catch (Exception $e) {
+    // Nettoyage en cas d'erreur
+    if (isset($targetPath) && file_exists($targetPath)) {
+        unlink($targetPath);
+    }
+    
+    error_log("[ERREUR] " . $e->getMessage());
+    header("Location: ../IHM/saisie_consommation.php?error=" . urlencode($e->getMessage()));
     exit();
 }
 ?>
