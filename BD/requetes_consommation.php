@@ -1,38 +1,66 @@
 <?php
-require_once 'connexion.php'; // Assurez-vous que cette connexion est correcte
+require_once 'connexion.php';
 function insererConsommation(
     PDO $pdo,
     int $ID_Compteur,
     int $Mois,
     int $Annee,
     float $Qté_consommé,
-    string $cheminFichierTemp // $_FILES['counterPicture']['tmp_name']
-): bool {
-    // Lire le contenu binaire du fichier
+    string $cheminFichierTemp
+): array {
     $contenuImage = file_get_contents($cheminFichierTemp);
     if ($contenuImage === false) {
         error_log("Erreur: Impossible de lire le fichier image");
-        return false;
+        return ['success' => false, 'message' => "Erreur: Impossible de lire le fichier image."];
     }
 
-    $sql = "INSERT INTO consommation 
-            (ID_Compteur, Mois, Annee, Qté_consommé, Image_Compteur) 
-            VALUES (?, ?, ?, ?, ?)";
-    
+    $sql_last = "SELECT Qté_consommé FROM consommation 
+                 WHERE ID_Compteur = ? 
+                 ORDER BY ID_Consommation DESC 
+                 LIMIT 1";
+
     try {
-        $stmt = $pdo->prepare($sql);
-        return $stmt->execute([
+        $stmt_last = $pdo->prepare($sql_last);
+        $stmt_last->execute([$ID_Compteur]);
+        $dernierEnregistrement = $stmt_last->fetch(PDO::FETCH_ASSOC);
+
+        $status = "pas d'anomalie";
+        $message = "Consommation enregistrée avec succès.";
+
+        if ($dernierEnregistrement) {
+            $dernierQté = (float) $dernierEnregistrement['Qté_consommé'];
+            $seuilSup = $dernierQté * 1.4; 
+            $seuilInf = $dernierQté * 0.6; 
+
+            if ($Qté_consommé > $seuilSup || $Qté_consommé < $seuilInf) {
+                $status = "anomalie";
+                $message = "Anomalie détectée dans votre saisie. La consommation a été enregistrée, en attente de validation.";
+            }
+        }
+
+        // Insérer la nouvelle consommation avec le statut
+        $sql_insert = "INSERT INTO consommation 
+                      (ID_Compteur, Mois, Annee, Qté_consommé, Image_Compteur, status) 
+                      VALUES (?, ?, ?, ?, ?, ?)";
+
+        $stmt_insert = $pdo->prepare($sql_insert);
+        $stmt_insert->execute([
             $ID_Compteur,
             $Mois,
             $Annee,
             $Qté_consommé,
-            $contenuImage // Données binaires
+            $contenuImage,
+            $status
         ]);
+
+        return ['success' => true, 'message' => $message];
+
     } catch (PDOException $e) {
         error_log("Erreur insertion: " . $e->getMessage());
-        return false;
+        return ['success' => false, 'message' => "Erreur lors de l'insertion des données."];
     }
 }
+
 function getLastCounterImage(PDO $pdo, int $compteurId): array {
     // Vérification de l'ID Compteur
     if ($compteurId <= 0) {

@@ -17,52 +17,36 @@ error_log("[DEBUG] GET: " . print_r($_GET, true));
 error_log("[DEBUG] POST: " . print_r($_POST, true));
 error_log("[DEBUG] FILES: " . print_r($_FILES, true));
 
-// Traitement des différentes actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validation des données
     $ID_Compteur = filter_input(INPUT_POST, 'ID_Compteur', FILTER_VALIDATE_INT);
-    $Mois = date('n'); // Mois actuel
-    $Annee = date('Y'); // Année actuelle
+    $Mois = date('n'); 
+    $Annee = date('Y'); 
     $Qte = filter_input(INPUT_POST, 'Qté_consommé', FILTER_VALIDATE_FLOAT);
-    // Vérification du fichier uploadé
+
     if (!isset($_FILES['counterPicture']) || $_FILES['counterPicture']['error'] !== UPLOAD_ERR_OK) {
         header("Location: ../IHM/saisie_consommation.php?message=" . urlencode("Erreur lors de l'upload de l'image"));
         exit;
     }
 
-    // Vérification du type MIME
     $typeMime = mime_content_type($_FILES['counterPicture']['tmp_name']);
     if (!in_array($typeMime, ['image/jpeg', 'image/png', 'image/gif'])) {
         header("Location: ../IHM/saisie_consommation.php?message=" . urlencode("Type de fichier non supporté"));
         exit;
     }
 
-    // Insertion
     $pdo = DB::connect();
     if (!$pdo) {
         die("Erreur de connexion à la base de données.");
     }
 
-    if (insererConsommation(
-        $pdo,
-        $ID_Compteur,
-        $Mois,
-        $Annee,
-        $Qte,
-        $_FILES['counterPicture']['tmp_name']
-    )) {
-        header("Location: ../IHM/saisie_consommation.php?success=1&message=" . urlencode("Consommation enregistrée avec succès"));
-        exit;
-    } else {
-        // Supprimer l'image si l'insertion échoue
-        unlink($_FILES['counterPicture']['tmp_name']);
-        header("Location: ../IHMsaisie_consommation.php?message=" . urlencode("Échec de l'enregistrement."));
-        exit;
-    }
+    $resultat = insererConsommation($pdo, $ID_Compteur, $Mois, $Annee, $Qte, $_FILES['counterPicture']['tmp_name']);
+
+    // On affiche toujours le message, même en cas d’anomalie
+    header("Location: ../IHM/saisie_consommation.php?message=" . urlencode($resultat['message']));
     exit;
 }elseif (isset($_GET['action']) && $_GET['action'] === 'get_last_image') {
     header('Content-Type: application/json');
-    ob_end_clean(); // Efface les sorties indésirables
+    ob_end_clean(); 
 
     try {
         if (!isset($_GET['compteur_id'])) {
