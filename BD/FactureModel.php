@@ -45,6 +45,22 @@ class FactureModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getFactureDetails($factureID) {
+        $sql = "SELECT f.ID_Facture, f.Mois, f.Annee, c.ID_Compteur, 
+                       u.Nom, u.Prénom, f.Date_émission, fc.Qté_consommé, 
+                       f.Prix_HT, f.Prix_TTC, f.Statut_paiement
+                FROM facture f
+                JOIN compteur c ON f.ID_Compteur = c.ID_Compteur
+                JOIN utilisateur u ON c.ID_Client = u.ID_Utilisateur
+                JOIN consommation fc ON f.ID_Consommation = fc.ID_Consommation
+                WHERE f.ID_Facture = :factureID";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':factureID', $factureID, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
 }
 
 
