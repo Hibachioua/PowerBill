@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PowerBill - Accueil</title>
+
+    <title>PowerBill - Votre solution de facturation d'électricité</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <header class="sticky-top">
+    <!-- Header -->
+    <header>
         <nav class="navbar navbar-expand-lg bg-white">
             <div class="container">
                 <a class="navbar-brand d-flex align-items-center" href="index.php">
@@ -24,16 +26,19 @@
                 <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                     <ul class="navbar-nav align-items-center">
                         <li class="nav-item">
-                            <a class="nav-link active px-3" href="index.php">Accueil</a>
+                            <a class="nav-link active" href="index.php">Accueil</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link px-3" href="services.php">Services</a>
+                            <!-- Ancre vers la section Services -->
+                            <a class="nav-link" href="index.php#services">Services</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link px-3" href="tarifs.php">Tarifs</a>
+                            <!-- Ancre vers la section Tarifs -->
+                            <a class="nav-link" href="index.php#tarifs">Tarifs</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link px-3" href="support.php">Support</a>
+                            <!-- Ancre vers la section Support -->
+                            <a class="nav-link" href="index.php#support">Support</a>
                         </li>
                         <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
                             <a class="btn btn-dark" href="login.php">Espace Client</a>
@@ -42,9 +47,5 @@
                 </div>
             </div>
         </nav>
+
     </header>
-
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
