@@ -2,7 +2,6 @@
 // Démarrer la session
 session_start();
 
-// Vérifier si l'utilisateur est connecté et a le rôle client
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] != 1) {
     header("Location: login.php");
     exit();
