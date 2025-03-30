@@ -1,5 +1,4 @@
 <?php
-// Traitement/login_traitement.php
 session_start();
 require_once "../BD/connexion.php";
 

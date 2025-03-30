@@ -1,14 +1,10 @@
 <?php
-// auth_check.php
 
 require_once "../BD/connexion.php";
 
-// Démarrer la session si ce n'est pas déjà fait
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-
-// Connexion à la base de données
 $connexion = connectDB();
 
 // Vérifier si l'utilisateur est connecté via session

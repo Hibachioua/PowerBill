@@ -23,94 +23,10 @@ $users = $viewData['users'];
     <title>PowerBill - Gestion des Utilisateurs</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="assets/style.css">
-    <style>
-        body {
-            display: flex;
-            background-color: #e9f3fc;
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial', sans-serif;
-        }
-        
-        .main-content {
-            margin-left: 250px;
-            width: calc(100% - 250px);
-            padding: 20px;
-        }
-        
-        .content-header {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .content-header h2 {
-            color: #3498db;
-            margin: 0;
-        }
-        
-        .content-container {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        
-        .table-container {
-            overflow-x: auto;
-        }
-        
-        .user-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .user-table th {
-            background-color: #f5f9fc;
-            color: #3498db;
-            text-align: left;
-            padding: 12px;
-            font-weight: 600;
-        }
-        
-        .user-table td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .user-table tr:hover {
-            background-color: #f5f9fc;
-        }
-        
-        .actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .btn-action {
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        .btn-edit {
-            background-color: #3498db;
-            color: white;
-            border: none;
-        }
-        
-        .btn-delete {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/manage_user.css">
+
+    
 </head>
 <body>
     <?php include "sidebar.php"; ?>
@@ -368,5 +284,20 @@ $users = $viewData['users'];
             });
         });
     </script>
+
+<script>
+    // Faire disparaître les alertes automatiquement après 5 secondes
+    document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('.alert');
+        
+        alerts.forEach(function(alert) {
+            setTimeout(function() {
+                // Utiliser Bootstrap pour fermer l'alerte avec animation
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 5000); // 5000 ms = 5 secondes
+        });
+    });
+</script>
 </body>
 </html>

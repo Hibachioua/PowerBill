@@ -1,9 +1,7 @@
 <?php
 require_once "../BD/user_model.php";
 
-/**
- * Traite les actions sur les utilisateurs
- */
+
 function processUserAction() {
     $message = '';
     $messageType = '';
@@ -23,8 +21,13 @@ function processUserAction() {
                 // Appeler la fonction du modèle
                 $result = addUser($nom, $prenom, $email, $password, $adresse);
                 
-                $message = $result['message'];
-                $messageType = $result['success'] ? 'success' : 'warning';
+                // Stocker le message dans la session
+                $_SESSION['flash_message'] = $result['message'];
+                $_SESSION['flash_message_type'] = $result['success'] ? 'success' : 'warning';
+                
+                // Rediriger pour éviter la résoumission du formulaire
+                header('Location: ' . $_SERVER['PHP_SELF']);
+                exit();
                 break;
 
             case 'edit':
@@ -40,8 +43,13 @@ function processUserAction() {
                     // Appeler la fonction du modèle
                     $result = updateUser($userId, $nom, $prenom, $email, $password, $adresse);
                     
-                    $message = $result['message'];
-                    $messageType = $result['success'] ? 'success' : 'warning';
+                    // Stocker le message dans la session
+                    $_SESSION['flash_message'] = $result['message'];
+                    $_SESSION['flash_message_type'] = $result['success'] ? 'success' : 'warning';
+                    
+                    // Rediriger pour éviter la résoumission du formulaire
+                    header('Location: ' . $_SERVER['PHP_SELF']);
+                    exit();
                 }
                 break;
                 
@@ -53,15 +61,32 @@ function processUserAction() {
                     // Appeler la fonction du modèle
                     $result = deleteUser($userId, $currentUserId);
                     
-                    $message = $result['message'];
-                    $messageType = $result['success'] ? 'success' : 'danger';
+                    // Stocker le message dans la session
+                    $_SESSION['flash_message'] = $result['message'];
+                    $_SESSION['flash_message_type'] = $result['success'] ? 'success' : 'danger';
+                    
+                    // Rediriger pour éviter la résoumission du formulaire
+                    header('Location: ' . $_SERVER['PHP_SELF']);
+                    exit();
                 }
                 break;
                 
             default:
-                $message = 'Action non reconnue';
-                $messageType = 'danger';
+                $_SESSION['flash_message'] = 'Action non reconnue';
+                $_SESSION['flash_message_type'] = 'danger';
+                header('Location: ' . $_SERVER['PHP_SELF']);
+                exit();
         }
+    }
+    
+    // Récupérer les messages de la session
+    if (isset($_SESSION['flash_message'])) {
+        $message = $_SESSION['flash_message'];
+        $messageType = $_SESSION['flash_message_type'];
+        
+        // Supprimer les messages de la session après les avoir récupérés
+        unset($_SESSION['flash_message']);
+        unset($_SESSION['flash_message_type']);
     }
     
     return [
