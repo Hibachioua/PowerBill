@@ -1,4 +1,5 @@
 <?php
+
 function connectDB() {
     $serveur       = "localhost";
     $port          = "3307"; 
@@ -24,4 +25,3 @@ function connectDB() {
         return null;
     }
 }
-?>

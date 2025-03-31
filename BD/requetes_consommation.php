@@ -1,0 +1,122 @@
+<?php
+require_once 'connexion.php';
+function insererConsommation(
+    int $ID_Compteur,
+    int $Mois,
+    int $Annee,
+    float $Qté_consommé,
+    string $cheminFichierTemp,
+    PDO $pdo
+): array {
+    $contenuImage = file_get_contents($cheminFichierTemp);
+    if ($contenuImage === false) {
+        error_log("Erreur: Impossible de lire le fichier image");
+        return ['success' => false, 'message' => "Erreur: Impossible de lire le fichier image."];
+    }
+
+    $sql_last = "SELECT Qté_consommé FROM consommation 
+                 WHERE ID_Compteur = ? 
+                 ORDER BY ID_Consommation DESC 
+                 LIMIT 1";
+
+    try {
+        $stmt_last = $pdo->prepare($sql_last);
+        $stmt_last->execute([$ID_Compteur]);
+        $dernierEnregistrement = $stmt_last->fetch(PDO::FETCH_ASSOC);
+
+        $status = "pas d'anomalie";
+        $message = "Consommation enregistrée avec succès.";
+
+        if ($dernierEnregistrement) {
+            $dernierQté = (float) $dernierEnregistrement['Qté_consommé'];
+            $seuilSup = $dernierQté * 1.4; 
+            $seuilInf = $dernierQté * 0.6; 
+
+            if ($Qté_consommé > $seuilSup || $Qté_consommé < $seuilInf) {
+                $status = "anomalie";
+                $message = "Anomalie détectée dans votre saisie. La consommation a été enregistrée, en attente de validation.";
+            }
+        }
+
+        // Insérer la nouvelle consommation avec le statut
+        $sql_insert = "INSERT INTO consommation 
+                      (ID_Compteur, Mois, Annee, Qté_consommé, Image_Compteur, status) 
+                      VALUES (?, ?, ?, ?, ?, ?)";
+
+        $stmt_insert = $pdo->prepare($sql_insert);
+        $stmt_insert->execute([
+            $ID_Compteur,
+            $Mois,
+            $Annee,
+            $Qté_consommé,
+            $contenuImage,
+            $status
+        ]);
+
+        return ['success' => true, 'message' => $message];
+
+    } catch (PDOException $e) {
+        error_log("Erreur insertion: " . $e->getMessage());
+        return ['success' => false, 'message' => "Erreur lors de l'insertion des données."];
+    }
+}
+
+
+function getLastCounterImage(int $compteurId): array {
+    // Connexion à la base de données via la fonction connectDB()
+    $pdo = connectDB();
+    if ($pdo === null) {
+        return ['success' => false, 'error' => 'Erreur de connexion à la base de données'];
+    }
+
+    // Vérification de l'ID Compteur
+    if ($compteurId <= 0) {
+        error_log("Erreur : ID Compteur invalide ($compteurId)");
+        return ['success' => false, 'error' => 'ID Compteur invalide'];
+    }
+
+    // Requête SQL pour récupérer la dernière image associée à un compteur
+    $sql = "SELECT Image_Compteur, 
+                   DATE_FORMAT(STR_TO_DATE(CONCAT(Annee, '-', Mois, '-01'), '%Y-%m-%d'), '%Y-%m') as date_prise 
+            FROM consommation 
+            WHERE ID_Compteur = :compteurId
+            ORDER BY ID_Consommation DESC 
+            LIMIT 1";
+
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':compteurId', $compteurId, PDO::PARAM_INT);
+
+        if (!$stmt->execute()) {
+            error_log("Erreur lors de l'exécution de la requête SQL");
+            return ['success' => false, 'error' => 'Erreur lors de l\'exécution de la requête'];
+        }
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$result) {
+            error_log("Aucun enregistrement trouvé pour ID_Compteur = $compteurId");
+            return ['success' => false, 'error' => 'Aucune image trouvée'];
+        }
+
+        if (empty($result['Image_Compteur'])) {
+            error_log("Image vide pour ID_Compteur = $compteurId");
+            return ['success' => false, 'error' => 'Image introuvable'];
+        }
+
+        // Encoder l'image en base64
+        $imageData = base64_encode($result['Image_Compteur']);
+
+        return [
+            'success' => true,
+            'image_data' => $imageData,
+            'date' => $result['date_prise'] ?? 'Date inconnue',
+            'content_type' => 'image/png'
+        ];
+
+    } catch (PDOException $e) {
+        error_log("Erreur PDO : " . $e->getMessage());
+        return ['success' => false, 'error' => 'Erreur interne du serveur'];
+    }
+}
+?>
