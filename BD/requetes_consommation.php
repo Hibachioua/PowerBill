@@ -1,12 +1,12 @@
 <?php
 require_once 'connexion.php';
 function insererConsommation(
-    PDO $pdo,
     int $ID_Compteur,
     int $Mois,
     int $Annee,
     float $Qté_consommé,
-    string $cheminFichierTemp
+    string $cheminFichierTemp,
+    PDO $pdo
 ): array {
     $contenuImage = file_get_contents($cheminFichierTemp);
     if ($contenuImage === false) {
@@ -61,7 +61,14 @@ function insererConsommation(
     }
 }
 
-function getLastCounterImage(PDO $pdo, int $compteurId): array {
+
+function getLastCounterImage(int $compteurId): array {
+    // Connexion à la base de données via la fonction connectDB()
+    $pdo = connectDB();
+    if ($pdo === null) {
+        return ['success' => false, 'error' => 'Erreur de connexion à la base de données'];
+    }
+
     // Vérification de l'ID Compteur
     if ($compteurId <= 0) {
         error_log("Erreur : ID Compteur invalide ($compteurId)");
@@ -112,3 +119,4 @@ function getLastCounterImage(PDO $pdo, int $compteurId): array {
         return ['success' => false, 'error' => 'Erreur interne du serveur'];
     }
 }
+?>
