@@ -4,6 +4,20 @@ session_start();
 require_once "../BD/connexion.php";
 require_once "../BD/LoginController.php"; // Utilisez le nom de fichier correct ici
 
+// 🔁 Fonction de redirection selon le rôle utilisateur
+function getRedirectPath($roleId) {
+    switch ($roleId) {
+        case 1: // Client
+            return '../IHM/client_dashboard.php';
+        case 2: // Agent
+            return '../IHM/agent_dashboard.php';
+        case 3: // Fournisseur
+            return '../IHM/fournisseur_dashboard.php';
+        default:
+            return '../IHM/dashboard.php'; // Page par défaut
+    }
+}
+
 // Vérifier si le formulaire a été soumis
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = filter_var($_POST["email"], FILTER_SANITIZE_EMAIL);

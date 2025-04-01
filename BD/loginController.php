@@ -222,16 +222,5 @@ function logoutUser($connexion) {
  * @param int $roleId ID du rôle de l'utilisateur
  * @return string Chemin de redirection
  */
-function getRedirectPath($roleId) {
-    switch ($roleId) {
-        case 1: // Client
-            return '../IHM/client_dashboard.php';
-        case 2: // Agent
-            return '../IHM/agent_dashboard.php';
-        case 3: // Fournisseur
-            return '../IHM/fournisseur_dashboard.php';
-        default:
-            return '../IHM/dashboard.php';
-    }
-}
+
 ?>
