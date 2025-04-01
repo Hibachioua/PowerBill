@@ -2,7 +2,7 @@
 // Traitement/login_traitement.php
 session_start();
 require_once "../BD/connexion.php";
-require_once "../BD/LoginController.php"; // Utilisez le nom de fichier correct ici
+require_once "../BD/LoginModel.php"; // Utilisez le nom de fichier correct ici
 
 // 🔁 Fonction de redirection selon le rôle utilisateur
 function getRedirectPath($roleId) {

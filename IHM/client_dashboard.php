@@ -1,11 +1,13 @@
 <?php
-// Démarrer la session
-session_start();
+require_once "../Traitement/auth_check.php";
 
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] != 1) {
-    header("Location: login.php");
-    exit();
-}
+$current_page = basename($_SERVER['PHP_SELF']); // ex : "client_dashboard.php"
+$user_role = $_SESSION['user_role'];            // récupéré après login
+
+$sidebar_data = getSidebarData($current_page, $user_role); // 💡 essentiel ici
+
+
+
 ?>
 <!DOCTYPE html>
 <html lang="fr">

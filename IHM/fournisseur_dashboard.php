@@ -1,7 +1,13 @@
 <?php
 require_once "../Traitement/auth_check.php";
 
-checkUserAccess(3);
+$current_page = basename($_SERVER['PHP_SELF']); // ex : "client_dashboard.php"
+$user_role = $_SESSION['user_role'];            // récupéré après login
+
+$sidebar_data = getSidebarData($current_page, $user_role); // 💡 essentiel ici
+
+
+
 ?>
 <!DOCTYPE html>
 <html lang="fr">
