@@ -3,6 +3,16 @@
 require_once "../Traitement/auth_check.php";
 require_once "../Traitement/user_traitement.php";
 
+
+$current_page = basename($_SERVER['PHP_SELF']); // ex : "client_dashboard.php"
+$user_role = $_SESSION['user_role'];            // récupéré après login
+
+$sidebar_data = getSidebarData($current_page, $user_role); // 💡 essentiel ici
+
+
+
+
+
 // Vérifier que l'utilisateur a le rôle fournisseur
 checkUserAccess(3);
 
@@ -230,74 +240,7 @@ $users = $viewData['users'];
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-    
-    <script>
-        // Initialisation manuelle des modals au chargement du document
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialiser les objets Modal
-            var addUserModal = new bootstrap.Modal(document.getElementById('addUserModal'));
-            var editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
-            var deleteUserModal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
-            
-            // Gestionnaire pour le bouton d'ajout
-            document.getElementById('addUserBtn').addEventListener('click', function() {
-                addUserModal.show();
-            });
-            
-            // Gestionnaires pour les boutons d'édition
-            document.querySelectorAll('.edit-user-btn').forEach(function(button) {
-                button.addEventListener('click', function() {
-                    // Récupérer les données utilisateur
-                    var userId = this.getAttribute('data-id');
-                    var nom = this.getAttribute('data-nom');
-                    var prenom = this.getAttribute('data-prenom');
-                    var email = this.getAttribute('data-email');
-                    var adresse = this.getAttribute('data-adresse');
-                    
-                    // Mettre à jour les champs du formulaire
-                    document.getElementById('edit_user_id').value = userId;
-                    document.getElementById('edit_nom').value = nom;
-                    document.getElementById('edit_prenom').value = prenom;
-                    document.getElementById('edit_email').value = email;
-                    document.getElementById('edit_adresse').value = adresse || '';
-                    
-                    // Afficher le modal
-                    editUserModal.show();
-                });
-            });
-            
-            // Gestionnaires pour les boutons de suppression
-            document.querySelectorAll('.delete-user-btn').forEach(function(button) {
-                button.addEventListener('click', function() {
-                    // Récupérer les données utilisateur
-                    var userId = this.getAttribute('data-id');
-                    var nom = this.getAttribute('data-nom');
-                    var prenom = this.getAttribute('data-prenom');
-                    
-                    // Mettre à jour les champs du formulaire
-                    document.getElementById('delete_user_id').value = userId;
-                    document.getElementById('delete_user_name').textContent = prenom + ' ' + nom;
-                    
-                    // Afficher le modal
-                    deleteUserModal.show();
-                });
-            });
-        });
-    </script>
+    <script src="assets/js/manage_user.js"></script>
 
-<script>
-    // Faire disparaître les alertes automatiquement après 5 secondes
-    document.addEventListener('DOMContentLoaded', function() {
-        const alerts = document.querySelectorAll('.alert');
-        
-        alerts.forEach(function(alert) {
-            setTimeout(function() {
-                // Utiliser Bootstrap pour fermer l'alerte avec animation
-                var bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            }, 5000); // 5000 ms = 5 secondes
-        });
-    });
-</script>
 </body>
 </html>
