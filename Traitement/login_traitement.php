@@ -2,9 +2,8 @@
 // Traitement/login_traitement.php
 session_start();
 require_once "../BD/connexion.php";
-require_once "../BD/LoginModel.php"; // Utilisez le nom de fichier correct ici
+require_once "../BD/LoginModel.php"; 
 
-// 🔁 Fonction de redirection selon le rôle utilisateur
 function getRedirectPath($roleId) {
     switch ($roleId) {
         case 1: // Client
@@ -18,7 +17,6 @@ function getRedirectPath($roleId) {
     }
 }
 
-// Vérifier si le formulaire a été soumis
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = filter_var($_POST["email"], FILTER_SANITIZE_EMAIL);
     $password = $_POST["password"];

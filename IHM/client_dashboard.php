@@ -4,7 +4,7 @@ require_once "../Traitement/auth_check.php";
 $current_page = basename($_SERVER['PHP_SELF']); // ex : "client_dashboard.php"
 $user_role = $_SESSION['user_role'];            // récupéré après login
 
-$sidebar_data = getSidebarData($current_page, $user_role); // 💡 essentiel ici
+$sidebar_data = prepareSidebarData($current_page, $user_role); // 💡 essentiel ici
 
 
 

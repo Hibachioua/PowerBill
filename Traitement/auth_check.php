@@ -33,64 +33,8 @@ function checkUserAccess($requiredRole = null) {
 }
 
 // Fonction pour obtenir l’URL du dashboard selon le rôle
-function getDashboardUrl($user_role) {
-    switch ($user_role) {
-        case 1: return 'client_dashboard.php';
-        case 2: return 'agent_dashboard.php';
-        case 3: return 'fournisseur_dashboard.php';
-        default: return 'dashboard.php';
-    }
-}
 
-// Fonction pour construire les données de la sidebar
-function getSidebarData($current_page, $user_role) {
-    return [
-        'nav_items' => [
-            'dashboard' => [
-                'icon' => 'fas fa-home',
-                'label' => 'Dashboard',
-                'url' => getDashboardUrl($user_role),
-                'active' => isDashboardActive($current_page)
-            ],
-            'history' => [
-                'icon' => 'fas fa-history',
-                'label' => 'History',
-                'url' => 'history.php',
-                'active' => ($current_page == 'history.php')
-            ],
-            'invoices' => [
-                'icon' => 'fas fa-file-invoice',
-                'label' => 'Manage invoices',
-                'url' => 'manage_invoices.php',
-                'active' => ($current_page == 'manage_invoices.php')
-            ],
-            'users' => [
-                'icon' => 'fas fa-user',
-                'label' => 'Manage User',
-                'url' => 'manage_user.php',
-                'active' => ($current_page == 'manage_user.php')
-            ],
-            'complaints' => [
-                'icon' => 'fas fa-exclamation-circle',
-                'label' => 'Manage complaints',
-                'url' => 'manage_complaints.php',
-                'active' => ($current_page == 'manage_complaints.php')
-            ]
-        ],
-        'logout_url' => '../Traitement/logout.php'
-    ];
-}
 
-// Fonction utilitaire pour vérifier si la page est un dashboard
-function isDashboardActive($current_page) {
-    return in_array($current_page, [
-        'dashboard.php',
-        'client_dashboard.php',
-        'agent_dashboard.php',
-        'fournisseur_dashboard.php'
-    ]);
-}
 
-// Fonction pour redirection selon le rôle
 
 ?>

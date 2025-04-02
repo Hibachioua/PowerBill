@@ -1,8 +1,7 @@
 <?php
-// IHM/manage_user.php - Vue pour la gestion des utilisateurs
 require_once "../Traitement/auth_check.php";
 require_once "../Traitement/user_traitement.php";
-
+require_once "../Traitement/sidebar_controller.php";
 ?>
 <!DOCTYPE html>
 <html lang="fr">
