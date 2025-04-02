@@ -105,36 +105,35 @@ async function fetchLastCounterImage(compteurId) {
 
     try {
         const response = await fetch(`../Traitement/consommation_traitement.php?action=get_last_image&compteur_id=${compteurId}`);
-        
-        if (!response.ok) {
-            throw new Error(`Échec de la requête : ${response.status}`);
-        }
-        
         const data = await response.json();
         
-        // Log the data to debug
-        console.log(data);
-
         if (!data.success) {
             throw new Error(data.error || 'Erreur de récupération');
         }
 
-        if (data.image_data) {
-            const imageSrc = 'data:' + data.content_type + ';base64,' + data.image_data;
+        if (data.image_url) {
             imageContainer.innerHTML = `
-                <img src="${imageSrc}" alt="Photo du compteur" style="max-width:100%; max-height:70vh;">
-                <button onclick="closePopup()" class="close-btn">Fermer</button>
+                <div class="image-header">
+                    <span>Dernière lecture: ${data.date}</span>
+                    <button onclick="closePopup()" class="close-btn">×</button>
+                </div>
+                <img src="${data.image_url}" alt="Photo du compteur" 
+                     onerror="this.onerror=null;this.src='assets/default-counter.jpg'">
             `;
         } else {
-            throw new Error('Aucune donnée image disponible');
+            imageContainer.innerHTML = `
+                <div class="no-image">
+                    <p>Aucune image précédente disponible</p>
+                    <button onclick="closePopup()" class="close-btn">Fermer</button>
+                </div>
+            `;
         }
 
     } catch (error) {
         imageContainer.innerHTML = `
-            <div class="error-container">
-                <p class="error-title">Erreur de chargement</p>
-                <p class="error-message">${error.message}</p>
-                <button onclick="closePopup()" class="close-btn">Fermer</button>
+            <div class="error-message">
+                <p>${error.message}</p>
+                <button onclick="closePopup()" class="btn">OK</button>
             </div>
         `;
     }

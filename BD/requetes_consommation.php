@@ -1,5 +1,6 @@
 <?php
 require_once 'connexion.php';
+
 function insererConsommation(
     int $ID_Compteur,
     int $Mois,
@@ -8,19 +9,56 @@ function insererConsommation(
     string $cheminFichierTemp,
     PDO $pdo
 ): array {
-    $contenuImage = file_get_contents($cheminFichierTemp);
-    if ($contenuImage === false) {
-        error_log("Erreur: Impossible de lire le fichier image");
-        return ['success' => false, 'message' => "Erreur: Impossible de lire le fichier image."];
+    // Configuration du dossier d'upload
+    $uploadDir = __DIR__ . '/../uploads/compteurs/';
+    
+    // Création du dossier si inexistant
+    if (!file_exists($uploadDir)) {
+        if (!mkdir($uploadDir, 0755, true)) {
+            error_log("Erreur : Impossible de créer le dossier d'upload");
+            return ['success' => false, 'message' => "Erreur système"];
+        }
     }
 
-    $sql_last = "SELECT Qté_consommé FROM consommation 
-                 WHERE ID_Compteur = ? 
-                 ORDER BY ID_Consommation DESC 
-                 LIMIT 1";
+    // Validation du fichier
+    $maxFileSize = 10 * 1024 * 1024; // 10MB
+    $fileSize = filesize($cheminFichierTemp);
+    if ($fileSize > $maxFileSize) {
+        return ['success' => false, 'message' => "L'image dépasse 10 Mo"];
+    }
+
+    // Génération d'un nom de fichier unique
+    $fileExtension = pathinfo($_FILES['counterPicture']['name'], PATHINFO_EXTENSION);
+    $filename = sprintf(
+        'compteur_%d_%d_%d_%s.%s',
+        $ID_Compteur,
+        $Mois,
+        $Annee,
+        uniqid(),
+        $fileExtension
+    );
+    $destinationPath = $uploadDir . $filename;
+
+    // Déplacement du fichier
+    if (!move_uploaded_file($cheminFichierTemp, $destinationPath)) {
+        error_log("Erreur déplacement fichier: " . $_FILES['counterPicture']['error']);
+        return ['success' => false, 'message' => "Erreur lors de l'enregistrement"];
+    }
+
+    // Chemin relatif pour la base de données
+    $relativePath = 'uploads/compteurs/' . $filename;
 
     try {
-        $stmt_last = $pdo->prepare($sql_last);
+        $pdo->beginTransaction();
+
+        // Vérification de la consommation précédente
+        $stmt_last = $pdo->prepare("
+            SELECT Qté_consommé 
+            FROM consommation 
+            WHERE ID_Compteur = ? 
+            ORDER BY ID_Consommation DESC 
+            LIMIT 1
+        ");
         $stmt_last->execute([$ID_Compteur]);
         $dernierEnregistrement = $stmt_last->fetch(PDO::FETCH_ASSOC);
 
@@ -28,95 +66,86 @@ function insererConsommation(
         $message = "Consommation enregistrée avec succès.";
 
         if ($dernierEnregistrement) {
-            $dernierQté = (float) $dernierEnregistrement['Qté_consommé'];
-            $seuilSup = $dernierQté * 1.4; 
-            $seuilInf = $dernierQté * 0.6; 
+            $dernierQté = (float)$dernierEnregistrement['Qté_consommé'];
+            $seuilSup = $dernierQté * 1.4;
+            $seuilInf = $dernierQté * 0.6;
 
             if ($Qté_consommé > $seuilSup || $Qté_consommé < $seuilInf) {
                 $status = "anomalie";
-                $message = "Anomalie détectée dans votre saisie. La consommation a été enregistrée, en attente de validation.";
+                $message = "Anomalie détectée. La consommation nécessite validation.";
             }
         }
 
-        // Insérer la nouvelle consommation avec le statut
-        $sql_insert = "INSERT INTO consommation 
-                      (ID_Compteur, Mois, Annee, Qté_consommé, Image_Compteur, status) 
-                      VALUES (?, ?, ?, ?, ?, ?)";
-
-        $stmt_insert = $pdo->prepare($sql_insert);
-        $stmt_insert->execute([
+        // Insertion dans la base de données
+        $stmt = $pdo->prepare("
+            INSERT INTO consommation 
+            (ID_Compteur, Mois, Annee, Qté_consommé, Image_Compteur, status)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([
             $ID_Compteur,
             $Mois,
             $Annee,
             $Qté_consommé,
-            $contenuImage,
+            $relativePath,
             $status
         ]);
 
+        $pdo->commit();
         return ['success' => true, 'message' => $message];
 
     } catch (PDOException $e) {
-        error_log("Erreur insertion: " . $e->getMessage());
-        return ['success' => false, 'message' => "Erreur lors de l'insertion des données."];
+        $pdo->rollBack();
+        // Nettoyage du fichier en cas d'échec
+        if (file_exists($destinationPath)) {
+            unlink($destinationPath);
+        }
+        error_log("Erreur PDO: " . $e->getMessage());
+        return ['success' => false, 'message' => "Erreur technique"];
     }
 }
 
-
 function getLastCounterImage(int $compteurId): array {
-    // Connexion à la base de données via la fonction connectDB()
-    $pdo = connectDB();
-    if ($pdo === null) {
-        return ['success' => false, 'error' => 'Erreur de connexion à la base de données'];
-    }
-
-    // Vérification de l'ID Compteur
-    if ($compteurId <= 0) {
-        error_log("Erreur : ID Compteur invalide ($compteurId)");
-        return ['success' => false, 'error' => 'ID Compteur invalide'];
-    }
-
-    // Requête SQL pour récupérer la dernière image associée à un compteur
-    $sql = "SELECT Image_Compteur, 
-                   DATE_FORMAT(STR_TO_DATE(CONCAT(Annee, '-', Mois, '-01'), '%Y-%m-%d'), '%Y-%m') as date_prise 
-            FROM consommation 
-            WHERE ID_Compteur = :compteurId
-            ORDER BY ID_Consommation DESC 
-            LIMIT 1";
-
+    $baseUrl = '/powerbill/'; // À adapter à votre configuration
+    
     try {
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':compteurId', $compteurId, PDO::PARAM_INT);
-
-        if (!$stmt->execute()) {
-            error_log("Erreur lors de l'exécution de la requête SQL");
-            return ['success' => false, 'error' => 'Erreur lors de l\'exécution de la requête'];
+        $pdo = connectDB();
+        if (!$pdo) {
+            throw new Exception("Connexion DB échouée");
         }
 
+        $stmt = $pdo->prepare("
+            SELECT Image_Compteur, 
+                   CONCAT(Annee, '-', LPAD(Mois, 2, '0')) as date_prise
+            FROM consommation 
+            WHERE ID_Compteur = ?
+            ORDER BY ID_Consommation DESC 
+            LIMIT 1
+        ");
+        $stmt->execute([$compteurId]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$result) {
-            error_log("Aucun enregistrement trouvé pour ID_Compteur = $compteurId");
-            return ['success' => false, 'error' => 'Aucune image trouvée'];
-        }
-
         if (empty($result['Image_Compteur'])) {
-            error_log("Image vide pour ID_Compteur = $compteurId");
-            return ['success' => false, 'error' => 'Image introuvable'];
+            throw new Exception("Aucune image trouvée en base");
         }
 
-        // Encoder l'image en base64
-        $imageData = base64_encode($result['Image_Compteur']);
+        $imagePath = __DIR__ . '/../' . $result['Image_Compteur'];
+        if (!file_exists($imagePath)) {
+            throw new Exception("Fichier introuvable: " . $imagePath);
+        }
 
         return [
             'success' => true,
-            'image_data' => $imageData,
-            'date' => $result['date_prise'] ?? 'Date inconnue',
-            'content_type' => 'image/png'
+            'image_url' => $baseUrl . $result['Image_Compteur'],
+            'date' => $result['date_prise']
         ];
 
-    } catch (PDOException $e) {
-        error_log("Erreur PDO : " . $e->getMessage());
-        return ['success' => false, 'error' => 'Erreur interne du serveur'];
+    } catch (Exception $e) {
+        error_log("Erreur getLastCounterImage: " . $e->getMessage());
+        return [
+            'success' => false,
+            'error' => $e->getMessage()
+        ];
     }
 }
 ?>
