@@ -54,10 +54,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $file['tmp_name'],
             $pdo
         );
-
-        header("Location: ../IHM/saisie_consommation.php?message=" . urlencode($resultat['message']));
-        exit;
-
+        
+        if ($resultat['success'] && isset($resultat['factureID'])) {
+            $factureID = $resultat['factureID'];
+            header("Location: ../Traitement/telecharger_facture.php?message=" . urlencode($resultat['message']) . "&generate_invoice=1&factureID=" . $factureID);
+            exit;
+        } else {
+            throw new Exception("ID de facture non défini");
+        }
     } catch (Exception $e) {
         error_log("Erreur traitement: " . $e->getMessage());
         header("Location: ../IHM/saisie_consommation.php?message=" . urlencode("Erreur: " . $e->getMessage()));
@@ -65,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Traitement GET (récupération image)
+
 if (isset($_GET['action']) && $_GET['action'] === 'get_last_image') {
     header('Content-Type: application/json');
     

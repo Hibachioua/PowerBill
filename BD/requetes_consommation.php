@@ -72,11 +72,11 @@ function insererConsommation(
 
             if ($Qté_consommé > $seuilSup || $Qté_consommé < $seuilInf) {
                 $status = "anomalie";
-                $message = "Anomalie détectée. La consommation nécessite validation.";
+                $message = "Anomalie détectée. La consommation a été enregistrée mais nécessite validation.";
             }
         }
 
-        // Insertion dans la base de données
+        // Insertion dans la table consommation
         $stmt = $pdo->prepare("
             INSERT INTO consommation 
             (ID_Compteur, Mois, Annee, Qté_consommé, Image_Compteur, status)
@@ -91,19 +91,58 @@ function insererConsommation(
             $status
         ]);
 
+        $ID_Consommation = $pdo->lastInsertId();
+        $result = ['success' => true, 'message' => $message];
+
+        // Création de la facture SEULEMENT si pas d'anomalie
+        if ($status === "pas d'anomalie") {
+            // Calcul du prix par tranches
+            if ($Qté_consommé <= 100) {
+                $prixHT = $Qté_consommé * 0.82;
+            } 
+            elseif ($Qté_consommé <= 150) {
+                $prixHT = 100 * 0.82 + ($Qté_consommé - 100) * 0.92;
+            } 
+            else {
+                $prixHT = 100 * 0.82 + 50 * 0.92 + ($Qté_consommé - 150) * 1.1;
+            }
+
+            $tauxTVA = 0.18; // TVA 18%
+            $prixTTC = $prixHT * (1 + $tauxTVA);
+
+            // Insertion dans la table facture
+            $stmtFacture = $pdo->prepare("
+                INSERT INTO facture 
+                (ID_Compteur, ID_Consommation, Date_émission, Mois, Annee, Prix_HT, Prix_TTC, Statut_paiement)
+                VALUES (?, ?, CURDATE(), ?, ?, ?, ?, 'non paye')
+            ");
+            $stmtFacture->execute([
+                $ID_Compteur,
+                $ID_Consommation,
+                $Mois,
+                $Annee,
+                round($prixHT, 2),
+                round($prixTTC, 2)
+            ]);
+
+            $factureID = $pdo->lastInsertId();
+            $result['message'] .= " Facture #$factureID générée.";
+            $result['factureID'] = $factureID;
+        }
+
         $pdo->commit();
-        return ['success' => true, 'message' => $message];
+        return $result;
 
     } catch (PDOException $e) {
         $pdo->rollBack();
-        // Nettoyage du fichier en cas d'échec
         if (file_exists($destinationPath)) {
             unlink($destinationPath);
         }
         error_log("Erreur PDO: " . $e->getMessage());
-        return ['success' => false, 'message' => "Erreur technique"];
+        return ['success' => false, 'message' => "Erreur technique: " . $e->getMessage()];
     }
 }
+
 
 function getLastCounterImage(int $compteurId): array {
     $baseUrl = '/powerbill/'; // À adapter à votre configuration
@@ -148,4 +187,3 @@ function getLastCounterImage(int $compteurId): array {
         ];
     }
 }
-?>
