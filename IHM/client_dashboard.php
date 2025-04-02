@@ -14,7 +14,7 @@ require_once "../Traitement/sidebar_controller.php";
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <?php include "header.php"; ?>
+    <?php include "header_client.php"; ?>
     
     <div class="container mt-5">
         <div class="row">
