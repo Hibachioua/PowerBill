@@ -1,5 +1,28 @@
 <?php
+require_once "../Traitement/auth_check.php";
 require_once "../BD/user_model.php";
+
+// Vérifier que l'utilisateur a le rôle fournisseur
+checkUserAccess(3);
+
+// Définir les variables globales utilisées par la vue
+$current_page = basename($_SERVER['SCRIPT_NAME']); 
+$user_role = $_SESSION['user_role'];
+$sidebar_data = getSidebarData($current_page, $user_role);
+
+// Traiter les actions (ajout, modification, suppression)
+$actionResult = processUserAction();
+$message = $actionResult['message'];
+$messageType = $actionResult['messageType'];
+
+// Préparer les données pour la vue
+$viewData = prepareUserData();
+$users = $viewData['users'];
+
+// Si ce fichier est appelé directement, rediriger vers la vue
+if (basename($_SERVER['SCRIPT_FILENAME']) == basename(__FILE__)) {
+    include "../IHM/manage_user.php";
+}
 
 
 function processUserAction() {

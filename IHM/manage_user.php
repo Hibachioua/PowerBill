@@ -3,21 +3,6 @@
 require_once "../Traitement/auth_check.php";
 require_once "../Traitement/user_traitement.php";
 
-
-$current_page = basename($_SERVER['PHP_SELF']); 
-$user_role = $_SESSION['user_role'];            
-$sidebar_data = getSidebarData($current_page, $user_role); 
-// Vérifier que l'utilisateur a le rôle fournisseur
-checkUserAccess(3);
-
-// Traiter les actions (ajout, modification, suppression)
-$actionResult = processUserAction();
-$message = $actionResult['message'];
-$messageType = $actionResult['messageType'];
-
-// Préparer les données pour la vue
-$viewData = prepareUserData();
-$users = $viewData['users'];
 ?>
 <!DOCTYPE html>
 <html lang="fr">
