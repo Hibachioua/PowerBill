@@ -1,6 +1,5 @@
 <?php
-// IHM/sidebar.php - Vue uniquement
-// Cette vue attend les variables $sidebar_data qui doivent être fournies par le contrôleur
+
 ?>
 <div class="sidebar">
     <div class="logo-container">
