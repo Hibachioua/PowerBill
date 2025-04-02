@@ -4,15 +4,9 @@ require_once "../Traitement/auth_check.php";
 require_once "../Traitement/user_traitement.php";
 
 
-$current_page = basename($_SERVER['PHP_SELF']); // ex : "client_dashboard.php"
-$user_role = $_SESSION['user_role'];            // récupéré après login
-
-$sidebar_data = getSidebarData($current_page, $user_role); // 💡 essentiel ici
-
-
-
-
-
+$current_page = basename($_SERVER['PHP_SELF']); 
+$user_role = $_SESSION['user_role'];            
+$sidebar_data = getSidebarData($current_page, $user_role); 
 // Vérifier que l'utilisateur a le rôle fournisseur
 checkUserAccess(3);
 
@@ -67,6 +61,7 @@ $users = $viewData['users'];
                             <th>ID</th>
                             <th>Nom</th>
                             <th>Prénom</th>
+                            <th>CIN</th>
                             <th>Email</th>
                             <th>Adresse</th>
                             <th>Actions</th>
@@ -78,6 +73,7 @@ $users = $viewData['users'];
                                 <td><?php echo $user['ID_Utilisateur']; ?></td>
                                 <td><?php echo htmlspecialchars($user['Nom']); ?></td>
                                 <td><?php echo htmlspecialchars($user['Prenom']); ?></td>
+                                <td><?php echo htmlspecialchars($user['CIN']); ?></td>
                                 <td><?php echo htmlspecialchars($user['Email']); ?></td>
                                 <td><?php echo htmlspecialchars($user['Adresse']); ?></td>
                                 <td class="actions">
@@ -85,6 +81,7 @@ $users = $viewData['users'];
                                             data-id="<?php echo $user['ID_Utilisateur']; ?>"
                                             data-nom="<?php echo htmlspecialchars($user['Nom']); ?>"
                                             data-prenom="<?php echo htmlspecialchars($user['Prenom']); ?>"
+                                            data-cin="<?php echo htmlspecialchars($user['CIN']); ?>"
                                             data-email="<?php echo htmlspecialchars($user['Email']); ?>"
                                             data-adresse="<?php echo htmlspecialchars($user['Adresse']); ?>">
                                         <i class="fas fa-edit"></i>
@@ -133,6 +130,11 @@ $users = $viewData['users'];
                         <div class="mb-3">
                             <label for="prenom" class="form-label">Prénom</label>
                             <input type="text" class="form-control" id="prenom" name="prenom" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cin" class="form-label">CIN</label>
+                            <input type="text" class="form-control" id="cin" name="cin" required>
                         </div>
                         
                         <div class="mb-3">
@@ -183,6 +185,11 @@ $users = $viewData['users'];
                         <div class="mb-3">
                             <label for="edit_prenom" class="form-label">Prénom</label>
                             <input type="text" class="form-control" id="edit_prenom" name="prenom" required>
+                        </div>
+
+                        <div class="mb-3">
+                           <label for="edit_cin" class="form-label">CIN</label>
+                           <input type="text" class="form-control" id="edit_cin" name="cin" required>
                         </div>
                         
                         <div class="mb-3">

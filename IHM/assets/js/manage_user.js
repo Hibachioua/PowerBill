@@ -20,6 +20,7 @@
                     var userId = this.getAttribute('data-id');
                     var nom = this.getAttribute('data-nom');
                     var prenom = this.getAttribute('data-prenom');
+                    var cin = this.getAttribute('data-cin');
                     var email = this.getAttribute('data-email');
                     var adresse = this.getAttribute('data-adresse');
                     
@@ -27,6 +28,7 @@
                     document.getElementById('edit_user_id').value = userId;
                     document.getElementById('edit_nom').value = nom;
                     document.getElementById('edit_prenom').value = prenom;
+                    document.getElementById('edit_cin').value = cin || '';
                     document.getElementById('edit_email').value = email;
                     document.getElementById('edit_adresse').value = adresse || '';
                     

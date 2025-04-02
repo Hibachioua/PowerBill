@@ -11,12 +11,9 @@ function getAllUsers() {
     
     if ($connexion) {
         try {
-            // Pour le débogage, afficher les résultats de la requête
-            error_log("Récupération des utilisateurs...");
-            
-            // Requête simplifiée
+            // Ajout du champ CIN à la requête
             $stmt = $connexion->query("
-                SELECT u.ID_Utilisateur, c.Nom, c.Prenom, c.Adresse, u.Email
+                SELECT u.ID_Utilisateur, c.Nom, c.Prenom, c.Adresse, c.CIN, u.Email
                 FROM utilisateur u
                 INNER JOIN client c ON u.ID_Utilisateur = c.ID_Utilisateur
                 WHERE u.ID_Role = 1
@@ -24,14 +21,13 @@ function getAllUsers() {
             ");
             
             $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            error_log("Nombre d'utilisateurs récupérés : " . count($users));
         } catch (PDOException $e) {
             error_log("Erreur lors de la récupération des utilisateurs: " . $e->getMessage());
         }
     }
     
     return $users;
-} 
+}
  
 function getAllRoles() {
     $connexion = connectDB();
@@ -75,11 +71,43 @@ function emailExists($email, $excludeUserId = null) {
     
     return false;
 }
+/**
+ * Vérifie si un CIN existe déjà
+ */
+function cinExists($cin, $excludeUserId = null) {
+    $connexion = connectDB();
+    
+    if ($connexion) {
+        try {
+            if ($excludeUserId) {
+                $stmt = $connexion->prepare("
+                    SELECT COUNT(*) FROM client c
+                    WHERE c.CIN = :cin AND c.ID_Utilisateur != :id
+                ");
+                $stmt->bindParam(':id', $excludeUserId);
+            } else {
+                $stmt = $connexion->prepare("
+                    SELECT COUNT(*) FROM client c
+                    WHERE c.CIN = :cin
+                ");
+            }
+            
+            $stmt->bindParam(':cin', $cin);
+            $stmt->execute();
+            
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la vérification du CIN: " . $e->getMessage());
+        }
+    }
+    
+    return false;
+}
 
 /**
  * Ajoute un nouvel utilisateur (client)
  */
-function addUser($nom, $prenom, $email, $password, $adresse) {
+function addUser($nom, $prenom, $email, $password, $adresse, $cin) {
     $connexion = connectDB();
     
     if (!$connexion) {
@@ -90,7 +118,6 @@ function addUser($nom, $prenom, $email, $password, $adresse) {
     }
     
     try {
-        // Vérifier si l'email existe déjà
         if (emailExists($email)) {
             return [
                 'success' => false,
@@ -98,10 +125,16 @@ function addUser($nom, $prenom, $email, $password, $adresse) {
             ];
         }
         
-        // Démarrer une transaction pour assurer la cohérence des données
+        if (cinExists($cin)) {
+            return [
+                'success' => false,
+                'message' => 'Ce CIN est déjà utilisé'
+            ];
+        }
+        
         $connexion->beginTransaction();
         
-        // 1. Insérer dans la table utilisateur
+        // Table utilisateur inchangée
         $stmtUser = $connexion->prepare("
             INSERT INTO utilisateur (Email, Mot_de_passe, ID_Role) 
             VALUES (:email, :password, 1)
@@ -110,21 +143,20 @@ function addUser($nom, $prenom, $email, $password, $adresse) {
         $stmtUser->bindParam(':password', $password);
         $stmtUser->execute();
         
-        // Récupérer l'ID de l'utilisateur inséré
         $userId = $connexion->lastInsertId();
         
-        // 2. Insérer dans la table client
+        // Ajout du CIN dans la table client
         $stmtClient = $connexion->prepare("
-            INSERT INTO client (Nom, Prenom, Adresse, ID_Utilisateur) 
-            VALUES (:nom, :prenom, :adresse, :userId)
+            INSERT INTO client (Nom, Prenom, Adresse, CIN, ID_Utilisateur) 
+            VALUES (:nom, :prenom, :adresse, :cin, :userId)
         ");
         $stmtClient->bindParam(':nom', $nom);
         $stmtClient->bindParam(':prenom', $prenom);
         $stmtClient->bindParam(':adresse', $adresse);
+        $stmtClient->bindParam(':cin', $cin);
         $stmtClient->bindParam(':userId', $userId);
         $stmtClient->execute();
         
-        // Valider la transaction
         $connexion->commit();
         
         return [
@@ -132,7 +164,6 @@ function addUser($nom, $prenom, $email, $password, $adresse) {
             'message' => 'Client ajouté avec succès'
         ];
     } catch (PDOException $e) {
-        // Annuler la transaction en cas d'erreur
         $connexion->rollBack();
         error_log("Erreur lors de l'ajout d'un client: " . $e->getMessage());
         return [
@@ -142,8 +173,7 @@ function addUser($nom, $prenom, $email, $password, $adresse) {
     }
 }
 
-
-function updateUser($userId, $nom, $prenom, $email, $password, $adresse) {
+function updateUser($userId, $nom, $prenom, $email, $password, $adresse, $cin) {
     $connexion = connectDB();
     
     if (!$connexion) {
@@ -154,7 +184,6 @@ function updateUser($userId, $nom, $prenom, $email, $password, $adresse) {
     }
     
     try {
-        // Vérifier si l'email existe déjà (pour un autre utilisateur)
         if (emailExists($email, $userId)) {
             return [
                 'success' => false,
@@ -162,41 +191,31 @@ function updateUser($userId, $nom, $prenom, $email, $password, $adresse) {
             ];
         }
         
-        // Démarrer une transaction
+        // Vérifier si le CIN existe déjà (pour un autre utilisateur)
+        if (cinExists($cin, $userId)) {
+            return [
+                'success' => false,
+                'message' => 'Utilisez votre CIN !'
+            ];
+        }
+        
         $connexion->beginTransaction();
         
-        // 1. Mettre à jour la table utilisateur
-        if (!empty($password)) {
-            $stmtUser = $connexion->prepare("
-                UPDATE utilisateur 
-                SET Email = :email, Mot_de_passe = :password
-                WHERE ID_Utilisateur = :id
-            ");
-            $stmtUser->bindParam(':password', $password);
-        } else {
-            $stmtUser = $connexion->prepare("
-                UPDATE utilisateur 
-                SET Email = :email
-                WHERE ID_Utilisateur = :id
-            ");
-        }
-        $stmtUser->bindParam(':email', $email);
-        $stmtUser->bindParam(':id', $userId);
-        $stmtUser->execute();
+        // Table utilisateur inchangée (avec ou sans mot de passe)
         
-        // 2. Mettre à jour la table client
+        // Ajout du CIN dans la mise à jour de la table client
         $stmtClient = $connexion->prepare("
             UPDATE client 
-            SET Nom = :nom, Prenom = :prenom, Adresse = :adresse
+            SET Nom = :nom, Prenom = :prenom, Adresse = :adresse, CIN = :cin
             WHERE ID_Utilisateur = :id
         ");
         $stmtClient->bindParam(':nom', $nom);
         $stmtClient->bindParam(':prenom', $prenom);
         $stmtClient->bindParam(':adresse', $adresse);
+        $stmtClient->bindParam(':cin', $cin);
         $stmtClient->bindParam(':id', $userId);
         $stmtClient->execute();
         
-        // Valider la transaction
         $connexion->commit();
         
         return [
@@ -204,7 +223,6 @@ function updateUser($userId, $nom, $prenom, $email, $password, $adresse) {
             'message' => 'Client modifié avec succès'
         ];
     } catch (PDOException $e) {
-        // Annuler la transaction en cas d'erreur
         $connexion->rollBack();
         error_log("Erreur lors de la modification d'un client: " . $e->getMessage());
         return [
@@ -213,6 +231,9 @@ function updateUser($userId, $nom, $prenom, $email, $password, $adresse) {
         ];
     }
 }
+
+
+
 function deleteUser($userId, $currentUserId) {
     $connexion = connectDB();
     
