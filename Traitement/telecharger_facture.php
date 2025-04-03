@@ -24,6 +24,7 @@ $model = new FactureModel($pdo);
 // Fetch the invoice details
 $facture = $model->getDetails($factureID);
 
+
 if (!$facture) {
     header('Location: ../IHM/ListeFactures.php');
     exit;
@@ -318,9 +319,13 @@ $html = <<<EOD
 </div>
 EOD;
 
-// Replace placeholders with actual data
+// Vérifiez si 'Nom' et 'Prénom' existent dans le tableau
+$nom = isset($facture['Nom']) ? $facture['Nom'] : 'Nom inconnu';
+$prenom = isset($facture['Prenom']) ? $facture['Prenom'] : 'Prénom inconnu';
+
+// Remplacer les placeholders dans le HTML
 $html = str_replace('{factureID}', htmlspecialchars($factureID), $html);
-$html = str_replace('{clientName}', htmlspecialchars($facture['Nom'] . ' ' . $facture['Prénom']), $html);
+$html = str_replace('{clientName}', htmlspecialchars($nom . ' ' . $prenom), $html);
 $html = str_replace('{compteurID}', htmlspecialchars($facture['ID_Compteur']), $html);
 $html = str_replace('{mois}', htmlspecialchars($facture['Mois']), $html);
 $html = str_replace('{annee}', htmlspecialchars($facture['Annee']), $html);
@@ -331,6 +336,7 @@ $html = str_replace('{prixHTFormatted}', number_format($prixHT, 2, ',', ' '), $h
 $html = str_replace('{montantTVAFormatted}', number_format($montantTVA, 2, ',', ' '), $html);
 $html = str_replace('{prixTTCFormatted}', number_format($prixTTC, 2, ',', ' '), $html);
 $html = str_replace('{paymentDeadline}', date('d/m/Y', strtotime($facture['Date_émission'] . ' +15 days')), $html);
+
 
 // Write the HTML content to the PDF
 $pdf->writeHTML($html, true, false, true, false, '');

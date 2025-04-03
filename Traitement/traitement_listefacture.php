@@ -22,30 +22,15 @@ try {
         exit;
     }
 
-    switch ($_GET['action']) {
-        case 'getFactures':
-            $factures = $model->getNonPayes();
-            echo json_encode([
-                'status' => 'success',
-                'data' => $factures
-            ]);
-            break;
-
-        case 'payerFacture':
-            if (!isset($_GET['factureID'])) {
-                throw new Exception("ID facture manquant");
-            }
-            $success = $model->payerFacture($_GET['factureID']);
-            echo json_encode([
-                'status' => $success ? 'success' : 'error',
-                'message' => $success ? 'Paiement enregistré' : 'Échec du paiement'
-            ]);
-            break;
-
-        default:
-            throw new Exception("Action non reconnue");
+    if ($_GET['action'] === 'getFactures') {
+        $factures = $model->getNonPayes();
+        echo json_encode([
+            'status' => 'success',
+            'data' => $factures
+        ]);
+    } else {
+        throw new Exception("Action non reconnue");
     }
-
 } catch (Exception $e) {
     error_log("Erreur: " . $e->getMessage());
     echo json_encode([

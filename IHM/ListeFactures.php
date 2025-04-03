@@ -23,48 +23,7 @@
             </button>
         </div>
 
-        <!-- Barre de recherche et filtres -->
-        <div class="filters-container">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="globalSearch" placeholder="Rechercher par nom, numéro de compteur, etc..." class="form-control">
-            </div>
-            
-            <div class="filter-row">
-                <div class="filter-group">
-                    <label for="filterYear">Année</label>
-                    <select id="filterYear" class="form-select">
-                        <option value="">Toutes les années</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label for="filterMonth">Mois</label>
-                    <select id="filterMonth" class="form-select">
-                        <option value="">Tous les mois</option>
-                        <option value="1">Janvier</option>
-                        <option value="2">Février</option>
-                        <!-- ... autres mois ... -->
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label for="filterAmount">Montant</label>
-                    <select id="filterAmount" class="form-select">
-                        <option value="">Tous les montants</option>
-                        <option value="0-500">Moins de 500 DH</option>
-                        <option value="500-1000">500 à 1000 DH</option>
-                        <option value="1000-2000">1000 à 2000 DH</option>
-                        <option value="2000+">Plus de 2000 DH</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="filter-actions">
-                <button id="resetFilters" class="btn btn-outline-secondary">Réinitialiser</button>
-            </div>
-        </div>
-
+        <!-- Tableau des factures -->
         <div class="table-container">
             <table>
                 <thead>
@@ -80,7 +39,7 @@
                     </tr>
                 </thead>
                 <tbody id="facture-table-body">
-                    <!-- Rempli dynamiquement -->
+                    <!-- Dynamically filled by JS -->
                 </tbody>
             </table>
         </div>
@@ -100,6 +59,7 @@
                 data: { action: 'getFactures' },
                 dataType: 'json',
                 success: function(response) {
+                    console.log(response);  // Affiche la réponse complète du serveur
                     if (response.status === "success") {
                         allFactures = response.data;
                         afficherFactures(response.data);
@@ -123,13 +83,14 @@
             }
 
             factures.forEach(facture => {
+                // Affichage des données dans le tableau
                 const row = `
                 <tr>
                     <td>${facture.Mois}/${facture.Annee}</td>
                     <td>${facture.ID_Compteur}</td>
-                    <td>${facture.Nom} ${facture.Prénom}</td>
+                    <td>${facture.Nom || 'Nom non disponible'} ${facture.Prenom || 'Prénom non disponible'}</td>
                     <td>${facture.Date_émission}</td>
-                    <td>${facture.Qté_consommé} kWh</td>
+                    <td>${facture.Qté_consommé || 'Consommation non disponible'} kWh</td>
                     <td>${facture.Prix_TTC} DH</td>
                     <td>
                         <span class="badge ${facture.Statut_paiement === 'paye' ? 'bg-success' : 'bg-warning'}">
@@ -137,9 +98,6 @@
                         </span>
                     </td>
                     <td>
-                        <button class="btn btn-sm btn-primary payer-btn" data-id="${facture.ID_Facture}">
-                            <i class="fas fa-money-bill-wave"></i> Payer
-                        </button>
                         <button class="btn btn-sm btn-secondary download-btn" data-id="${facture.ID_Facture}">
                             <i class="fas fa-download"></i> PDF
                         </button>
@@ -149,24 +107,24 @@
             });
         }
 
-        // Initialisation
-        chargerFactures();
-        setInterval(chargerFactures, 30000); // Rafraîchissement toutes les 30s
-
-        // Gestion des événements
-        $(document).on('click', '.payer-btn', function() {
-            const factureID = $(this).data('id');
-            payerFacture(factureID);
-        });
-
+        // Fonction pour télécharger la facture au format PDF
         $(document).on('click', '.download-btn', function() {
             const factureID = $(this).data('id');
+            if (!factureID || isNaN(factureID)) {
+                alert("Facture invalide !");
+                return;
+            }
             window.location.href = `../Traitement/telecharger_facture.php?factureID=${factureID}`;
         });
 
+        // Redirection pour consulter les anciennes factures
         $('#consulterAnciennesFactures').click(function() {
             window.location.href = 'ListeFacturesPayees.php';
         });
+
+        // Charger les factures au démarrage et toutes les 30 secondes
+        chargerFactures();
+        setInterval(chargerFactures, 30000);
     });
     </script>
 </body>
