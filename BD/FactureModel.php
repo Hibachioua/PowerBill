@@ -17,16 +17,26 @@ class FactureModel {
                 WHERE f.Statut_paiement = 'non paye'
                 ORDER BY f.Date_émission DESC";
         
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error in getNonPayes: " . $e->getMessage());
+            return false;
+        }
     }
 
     public function payerFacture($factureID) {
         $sql = "UPDATE facture SET Statut_paiement = 'paye', Date_paiement = NOW() 
                 WHERE ID_Facture = :id";
-        $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute([':id' => $factureID]);
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            return $stmt->execute([':id' => $factureID]);
+        } catch (PDOException $e) {
+            error_log("Error in payerFacture: " . $e->getMessage());
+            return false;
+        }
     }
 
     public function getDetails($factureID) {
@@ -37,8 +47,13 @@ class FactureModel {
                 JOIN consommation fc ON f.ID_Consommation = fc.ID_Consommation
                 WHERE f.ID_Facture = :id";
         
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':id' => $factureID]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':id' => $factureID]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error in getDetails: " . $e->getMessage());
+            return false;
+        }
     }
 }
