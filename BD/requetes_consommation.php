@@ -126,7 +126,7 @@ function insererConsommation(
             ]);
 
             $factureID = $pdo->lastInsertId();
-            $result['message'] .= " Facture #$factureID générée.";
+            $result['message'] .= " Facture #$factureID générée.Consultez là dans la page des factures";
             $result['factureID'] = $factureID;
         }
 

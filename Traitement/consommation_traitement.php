@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if ($resultat['success'] && isset($resultat['factureID'])) {
             $factureID = $resultat['factureID'];
-            header("Location: ../Traitement/telecharger_facture.php?message=" . urlencode($resultat['message']) . "&generate_invoice=1&factureID=" . $factureID);
+            header("Location: ../IHM/ListeFactures.php");
             exit;
         } else {
             throw new Exception("ID de facture non défini");
