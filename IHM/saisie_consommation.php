@@ -1,36 +1,8 @@
 <?php
 session_start();
-require_once "../BD/connexion.php"; 
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] != 1) { 
+if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] != 1) {
     header("Location: login.php");
     exit();
-}
-
-$user_id = $_SESSION['user_id']; 
-$user_email = htmlspecialchars($_SESSION['user_email']); 
-
-try {
-    $pdo = connectDB(); 
-    $stmt = $pdo->prepare("SELECT ID_Client FROM client WHERE ID_Utilisateur = ?");
-    $stmt->execute([$user_id]);
-    $client = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Vérifier si l'utilisateur est bien un client
-    if (!$client) {
-        die("Aucun client trouvé pour cet utilisateur.");
-    }
-
-    $ID_Client = $client['ID_Client'];
-} catch (PDOException $e) {
-    die("Erreur : " . $e->getMessage());
-}
-
-try {
-    $stmt = $pdo->prepare("SELECT ID_Compteur FROM compteur WHERE ID_Client = ?");
-    $stmt->execute([$ID_Client]);
-    $compteurs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Erreur : " . $e->getMessage());
 }
 ?>
 <!DOCTYPE html>
@@ -47,11 +19,7 @@ try {
     <h2>Enregistrez votre consommation du mois</h2>
 
     <!-- Affichage des messages d'erreur/succès -->
-    <?php if (isset($_GET['message'])): ?>
-        <div class="alert <?= isset($_GET['success']) ? 'alert-success' : 'alert-danger' ?>">
-            <?= htmlspecialchars(urldecode($_GET['message'])) ?>
-        </div>
-    <?php endif; ?>
+    <div id="messageContainer"></div>
 
     <form id="consumptionForm" action="../Traitement/consommation_traitement.php" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
     
@@ -59,15 +27,12 @@ try {
     <div class="form-group">
         <label for="ID_Compteur">ID Compteur :</label>
         <select id="ID_Compteur" name="ID_Compteur" required onchange="fetchLastCounterImage(this.value)">
-            <option value="" disabled selected>Choisissez votre compteur</option>
-            <?php foreach ($compteurs as $compteur): ?>
-                <option value="<?= htmlspecialchars($compteur['ID_Compteur']); ?>">Compteur <?= htmlspecialchars($compteur['ID_Compteur']); ?></option>
-            <?php endforeach; ?>
+            <option value="" disabled selected>Chargement...</option>
         </select>
     </div>
 
-    <input type="hidden" id="Mois" name="Mois" min="1" max="12" required>
-    <input type="hidden" id="Annee" name="Annee" min="2020" max="2030" required>
+    <input type="hidden" id="Mois" name="Mois" value="<?= date('n'); ?>">
+    <input type="hidden" id="Annee" name="Annee" value="<?= date('Y'); ?>">
 
     <div class="form-group">
         <label for="Qté_consommé">Quantité Consommée (kWh):</label>
@@ -90,12 +55,33 @@ try {
 </div>
 
 <script>
-// Validation du formulaire pour éviter la double soumission
-function validateForm() {
-    document.getElementById('submitBtn').disabled = true;
-    return true;
+// Récupérer dynamiquement les compteurs via AJAX
+async function fetchCompteurs() {
+    try {
+        const response = await fetch('../Traitement/consommation_traitement.php?action=get_compteurs');
+        const data = await response.json();
+
+        const select = document.getElementById('ID_Compteur');
+        select.innerHTML = '<option value="" disabled selected>Choisissez votre compteur</option>';
+
+        if (!data.success) {
+            throw new Error(data.error || 'Impossible de récupérer les compteurs.');
+        }
+
+        data.compteurs.forEach(compteur => {
+            const option = document.createElement('option');
+            option.value = compteur.ID_Compteur;
+            option.textContent = `Compteur ${compteur.ID_Compteur}`;
+            select.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error('Erreur:', error);
+        document.getElementById('messageContainer').innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+    }
 }
 
+// Récupérer la dernière image associée à un compteur
 async function fetchLastCounterImage(compteurId) {
     const popup = document.getElementById('imagePopup');
     const imageContainer = document.getElementById('lastCounterImage');
@@ -139,6 +125,12 @@ async function fetchLastCounterImage(compteurId) {
     }
 }
 
+// Validation du formulaire pour éviter la double soumission
+function validateForm() {
+    document.getElementById('submitBtn').disabled = true;
+    return true;
+}
+
 function closePopup() {
     document.getElementById('imagePopup').style.display = 'none';
 }
@@ -154,11 +146,12 @@ document.addEventListener('keydown', function(e) {
         closePopup();
     }
 });
+
+// Charger les compteurs au chargement de la page
+document.addEventListener('DOMContentLoaded', fetchCompteurs);
 </script>
 
 </body>
 </html>
 
 <?php include "footer.php"; ?>
-
-

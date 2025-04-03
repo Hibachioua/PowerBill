@@ -114,27 +114,28 @@
     $(document).ready(function() {
         let allFactures = [];
         
-        function chargerFactures() {
-            $.ajax({
-                url: '../Traitement/traitement_listefacture.php',
-                type: 'GET',
-                data: { action: 'getFactures' },
-                dataType: 'json',
-                success: function(response) {
-                    console.log(response);  // Affiche la réponse complète du serveur
-                    if (response.status === "success") {
-                        allFactures = response.data;
-                        afficherFactures(response.data);
-                        populateYearFilter(response.data);
-                    } else {
-                        showError(response.message || "Erreur de chargement");
-                    }
-                },
-                error: function(xhr, status, error) {
-                    showError("Erreur de connexion au serveur");
-                }
-            });
+      function chargerFactures() {
+    $.ajax({
+        url: '../Traitement/traitement_listefacture.php',
+        type: 'GET',
+        data: { action: 'getFactures' }, // L'ID utilisateur est récupéré côté serveur
+        dataType: 'json',
+        success: function(response) {
+            console.log(response);  // Vérifie la réponse du serveur
+            if (response.status === "success") {
+                allFactures = response.data;
+                afficherFactures(response.data);
+                populateYearFilter(response.data);
+            } else {
+                showError(response.message || "Erreur de chargement");
+            }
+        },
+        error: function(xhr, status, error) {
+            showError("Erreur de connexion au serveur");
         }
+    });
+}
+
 
         function afficherFactures(factures) {
             const tbody = $('#facture-table-body').empty();

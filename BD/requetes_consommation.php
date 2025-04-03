@@ -187,3 +187,24 @@ function getLastCounterImage(int $compteurId): array {
         ];
     }
 }
+function getClientId($user_id) {
+    try {
+        $pdo = connectDB();
+        $stmt = $pdo->prepare("SELECT ID_Client FROM client WHERE ID_Utilisateur = ?");
+        $stmt->execute([$user_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC)['ID_Client'] ?? null;
+    } catch (PDOException $e) {
+        die("Erreur : " . $e->getMessage());
+    }
+}
+
+function getCompteurs($ID_Client) {
+    try {
+        $pdo = connectDB();
+        $stmt = $pdo->prepare("SELECT ID_Compteur FROM compteur WHERE ID_Client = ?");
+        $stmt->execute([$ID_Client]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        die("Erreur : " . $e->getMessage());
+    }
+}
