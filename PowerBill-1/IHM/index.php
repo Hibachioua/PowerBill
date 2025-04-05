@@ -51,7 +51,7 @@
                 <p>Obtenez une assistance instantanée pour tout problème lié à la facturation.</p>
             </div>
             <div class="col-md-4">
-                <img src="assets/images/meterr.svg" alt="Automated Readings" class="img-fluid">
+                <img src="assets/images/meter.svg" alt="Automated Readings" class="img-fluid">
                 <h4>Relevés de Compteur Automatisés</h4>
                 <p>Recevez des mises à jour précises et en temps réel sur votre consommation d'électricité.</p>
             </div>
