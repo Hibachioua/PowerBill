@@ -3,8 +3,8 @@
 ?>
 <div class="sidebar">
     <div class="logo-container">
-        <img src="assets/images/bolt-icon.png" alt="PowerBill" class="logo">
-        <h2 class="brand-name">PowerBill</h2>
+    <i class="fas fa-bolt me-2" style="color: #f39c12; font-size: 24px;"></i>
+    <h2 class="brand-name">PowerBill</h2>
     </div>
     
     <div class="nav-menu">

@@ -23,7 +23,7 @@ require_once "../Traitement/sidebar_controller.php";
         <div class="dashboard-header">
             <div>
                 <div class="breadcrumb">PowerBill / Dashboard</div>
-                <h2>Espace Client</h2>
+                <h2>Espace Fournisseur</h2>
             </div>
             <div class="search-bar">
                 <input type="text" placeholder="Search...">
