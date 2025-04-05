@@ -1,32 +1,43 @@
 <?php
-require_once __DIR__ . "/../BD/connexion.php";
-require_once __DIR__ . "/../BD/FactureModel.php";
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+require_once __DIR__ . '/../BD/connexion.php';
+require_once __DIR__ . '/../BD/FactureModel.php';
+require_once __DIR__ . '/../libs/tcpdf/tcpdf.php';
 
-if (!isset($_GET['factureID'])) {
+// Initialize the database connection
+$pdo = connectDB();
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+// Check if the factureID is provided
+if (!isset($_GET['factureID']) || !is_numeric($_GET['factureID'])) {
     header('Location: ../IHM/ListeFactures.php');
     exit;
 }
 
-$factureID = $_GET['factureID'];
-$model = new FactureModel();
-$facture = $model->getFactureDetails($factureID);
+$factureID = intval($_GET['factureID']);
+
+// Create an instance of FactureModel
+$model = new FactureModel($pdo);
+
+// Fetch the invoice details
+$facture = $model->getDetails($factureID);
+
 
 if (!$facture) {
     header('Location: ../IHM/ListeFactures.php');
     exit;
 }
 
+// Calculate the invoice amounts
 $consommation = $facture['Qté_consommé'];
 $prixUnitaire = ($consommation <= 100) ? 0.82 : (($consommation <= 150) ? 0.92 : 1.1);
 $prixHT = $consommation * $prixUnitaire;
 $montantTVA = $prixHT * 0.18;
 $prixTTC = $prixHT + $montantTVA;
 
-$tcpdfPath = __DIR__ . '/../libs/tcpdf/tcpdf.php';
-if (!file_exists($tcpdfPath)) die("Erreur : Impossible de trouver TCPDF");
-require_once($tcpdfPath);
-
-class MYPDF extends TCPDF {
+class CustomTCPDF extends TCPDF {
     public function Header() {
         // Utilisation de la police helvetica standard
         $this->SetFont('helvetica', 'B', 24);
@@ -43,7 +54,7 @@ class MYPDF extends TCPDF {
         $leftMargin = 15; // Marge de 15mm depuis la gauche
         
         // Ajout de l'image à gauche
-        $imagePath = __DIR__ . '\lightning_logo.png';
+        $imagePath = __DIR__ . '/lightning_logo.png';
         if (file_exists($imagePath)) {
             $this->Image($imagePath, $leftMargin, 10, 15, 15, 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
         }
@@ -58,6 +69,7 @@ class MYPDF extends TCPDF {
         $this->SetLineWidth(1.5);
         $this->Line(10, 30, $this->getPageWidth()-10, 30);
     }
+
     public function Footer() {
         $this->SetY(-20);
         $this->SetFont('helvetica', '', 8);
@@ -75,16 +87,16 @@ class MYPDF extends TCPDF {
     }
 }
 
-// Création du PDF
-$pdf = new MYPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, 'A4', true, 'UTF-8', false);
+// Create a new PDF document using the custom TCPDF class
+$pdf = new CustomTCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, 'A4', true, 'UTF-8', false);
 $pdf->SetCreator(PDF_CREATOR);
 $pdf->SetAuthor('PowerBill');
-$pdf->SetTitle('Facture #'.$factureID);
+$pdf->SetTitle('Facture #' . $factureID);
 $pdf->SetSubject('Facture d\'électricité');
 $pdf->AddPage();
 
-// Styles CSS intégrés
-$style = <<<EOD
+// Define the HTML content for the PDF
+$html = <<<EOD
 <style>
     .invoice-header {
         background: linear-gradient(90deg, #3498db, #2980b9);
@@ -221,20 +233,17 @@ $style = <<<EOD
         background-color: #f8f9fa;
     }
 </style>
-EOD;
 
-// Contenu HTML de la facture
-$html = $style . '
 <div class="invoice-header">
     <div class="invoice-title">FACTURE</div>
-    <div class="invoice-number">N° '.htmlspecialchars($factureID).'</div>
+    <div class="invoice-number">N° {factureID}</div>
 </div>
 
 <div class="info-box company-box">
     <div class="info-title">Société</div>
     <div class="info-content">
         <strong>PowerBill</strong><br>
-        123 Avenue de l\'Énergie, Casablanca<br>
+        123 Avenue de l'Énergie, Casablanca<br>
         Tél: +212 5 22 123 456<br>
         Email: contact@powerbill.ma<br>
         Site: www.powerbill.ma
@@ -244,10 +253,10 @@ $html = $style . '
 <div class="info-box client-box">
     <div class="info-title">Client</div>
     <div class="info-content">
-        <strong>'.htmlspecialchars($facture['Nom'].' '.$facture['Prénom']).'</strong><br>
-        Compteur: '.htmlspecialchars($facture['ID_Compteur']).'<br>
-        Période: '.htmlspecialchars($facture['Mois']).' '.htmlspecialchars($facture['Annee']).'<br>
-        Date d\'émission: '.htmlspecialchars($facture['Date_émission']).'
+        <strong>{clientName}</strong><br>
+        Compteur: {compteurID}<br>
+        Période: {mois} {annee}<br>
+        Date d'émission: {dateEmission}
     </div>
 </div>
 
@@ -263,8 +272,8 @@ $html = $style . '
         <tbody>
            <tr>
                 <td>Consommation électrique</td>
-                <td class="center-align bold">'.htmlspecialchars($consommation).' kWh</td>
-                <td class="right-align bold">'.number_format($prixUnitaire, 4, ',', ' ').' DH/kWh</td>
+                <td class="center-align bold">{consommation} kWh</td>
+                <td class="right-align bold">{prixUnitaireFormatted} DH/kWh</td>
             </tr>
         </tbody>
     </table>
@@ -279,15 +288,15 @@ $html = $style . '
         <tbody>
             <tr class="summary-row">
                 <td colspan="2">Total HT</td>
-                <td class="amount">'.number_format($prixHT, 2, ',', ' ').'</td>
+                <td class="amount">{prixHTFormatted}</td>
             </tr>
             <tr class="summary-row">
                 <td colspan="2">TVA (18%)</td>
-                <td class="amount">'.number_format($montantTVA, 2, ',', ' ').'</td>
+                <td class="amount">{montantTVAFormatted}</td>
             </tr>
             <tr class="border-top">
                 <td colspan="2" class="bold">Total TTC</td>
-                <td class="amount bold">'.number_format($facture['Prix_TTC'], 2, ',', ' ').'</td>
+                <td class="amount bold">{prixTTCFormatted}</td>
             </tr>
         </tbody>
     </table>
@@ -295,21 +304,43 @@ $html = $style . '
 
 <div class="total-container">
     <div class="total-amount">
-        Total à payer: '.number_format($facture['Prix_TTC'], 2, ',', ' ').' DH
+        Total à payer: {prixTTCFormatted} DH
     </div>
 </div>
 
 <div class="payment-info">
     <strong>Informations de paiement:</strong><br>
-    Paiement attendu avant le <span class="highlight">'.date('d/m/Y', strtotime($facture['Date_émission'].' +15 days')).'</span><br>
+    Paiement attendu avant le <span class="highlight">{paymentDeadline}</span><br>
     Mode de paiement: Virement bancaire ou Paiement en ligne
 </div>
 
 <div class="thank-you">
     Nous vous remercions pour votre confiance.<br>
-</div>';
+</div>
+EOD;
 
-// Génération du PDF
+// Vérifiez si 'Nom' et 'Prénom' existent dans le tableau
+$nom = isset($facture['Nom']) ? $facture['Nom'] : 'Nom inconnu';
+$prenom = isset($facture['Prenom']) ? $facture['Prenom'] : 'Prénom inconnu';
+
+// Remplacer les placeholders dans le HTML
+$html = str_replace('{factureID}', htmlspecialchars($factureID), $html);
+$html = str_replace('{clientName}', htmlspecialchars($nom . ' ' . $prenom), $html);
+$html = str_replace('{compteurID}', htmlspecialchars($facture['ID_Compteur']), $html);
+$html = str_replace('{mois}', htmlspecialchars($facture['Mois']), $html);
+$html = str_replace('{annee}', htmlspecialchars($facture['Annee']), $html);
+$html = str_replace('{dateEmission}', htmlspecialchars($facture['Date_émission']), $html);
+$html = str_replace('{consommation}', htmlspecialchars($consommation), $html);
+$html = str_replace('{prixUnitaireFormatted}', number_format($prixUnitaire, 4, ',', ' '), $html);
+$html = str_replace('{prixHTFormatted}', number_format($prixHT, 2, ',', ' '), $html);
+$html = str_replace('{montantTVAFormatted}', number_format($montantTVA, 2, ',', ' '), $html);
+$html = str_replace('{prixTTCFormatted}', number_format($prixTTC, 2, ',', ' '), $html);
+$html = str_replace('{paymentDeadline}', date('d/m/Y', strtotime($facture['Date_émission'] . ' +15 days')), $html);
+
+
+// Write the HTML content to the PDF
 $pdf->writeHTML($html, true, false, true, false, '');
-$pdf->Output('facture_'.$factureID.'.pdf', 'D');
+
+// Output the PDF
+$pdf->Output('facture_' . $factureID . '.pdf', 'D');
 exit;

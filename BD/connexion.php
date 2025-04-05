@@ -1,27 +1,27 @@
 <?php
-class Database {
-    private static $pdo = null;
 
-    public static function connect() {
-        if (self::$pdo === null) {
-            $serveur       = "localhost";
-            $port          = "3306"; 
-            $utilisateur   = "douae";
-            $motdepasse    = "roujina25";
-            $basededonnees = "powerbill";
+function connectDB() {
+    $serveur       = "localhost";
+    $port          = "3306"; 
+    $utilisateur   = "douae";
+    $motdepasse    = "roujina25";
+    $basededonnees = "powerbill2";
 
-            try {
-                self::$pdo = new PDO(
-                    "mysql:host=$serveur;port=$port;dbname=$basededonnees;charset=utf8", 
-                    $utilisateur, 
-                    $motdepasse,
-                    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-                );
-            } catch (PDOException $e) {
-                die("Erreur de connexion : " . $e->getMessage());
-            }
+    try {
+        $pdo = new PDO("mysql:host=$serveur;port=$port;dbname=$basededonnees", $utilisateur, $motdepasse);
+        $pdo->exec("set names utf8");
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        return $pdo;
+    } catch (PDOException $e) {
+        // Au lieu d'afficher l'erreur, stockez-la dans une variable de session
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
         }
-        return self::$pdo;
+        $_SESSION['login_error'] = "Erreur de connexion à la base de données: " . $e->getMessage();
+        
+        // Log l'erreur pour le débogage
+        error_log("Erreur de connexion BD: " . $e->getMessage());
+        
+        return null;
     }
 }
-?>

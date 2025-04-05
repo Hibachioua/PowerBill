@@ -8,14 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/style.css">
-    <link rel="stylesheet" href="assets/styleListeFacture.css?v=1.0">
-    <link rel="stylesheet" href="assets/filter-styles.css"> 
-
-
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/styleListeFacture.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/filter-styles.css">
 </head>
 <body>
-    <div class="containerListe">
+<div class="containerListe">
         <div class="title">
             <h2>Vos Factures</h2>
         </div>
@@ -77,179 +75,111 @@
         
     </div>
 </div>
+
+
+        <!-- Tableau des factures -->
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>Période de Consommation</th>
-                        <th>Numéro du Compteur</th>
-                        <th>Nom Complet</th>
-                        <th>Date de Facturation</th>
+                        <th>Période</th>
+                        <th>Compteur</th>
+                        <th>Client</th>
+                        <th>Date Facture</th>
                         <th>Consommation</th>
                         <th>Montant</th>
-                        <th>État Facture</th>
-                        <th>Action</th>
+                        <th>État</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="facture-table-body">
-                    <!-- Les données seront ajoutées ici dynamiquement avec JavaScript -->
+                    <!-- Dynamically filled by JS -->
                 </tbody>
             </table>
         </div>
     </div>
+
     <?php include('footer.php'); ?>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-
-$(document).ready(function () {
-    let allFactures = []; // Stocker toutes les factures pour le filtrage
-
-    // Fonction pour charger les factures
-    function chargerFactures() {
-        $.ajax({
-            url: '../Traitement/traitement_listefacture.php',
-            type: 'GET',
-            data: { action: 'getFactures' },
-            dataType: 'json',
-            success: function (data) {
-                console.log("Données reçues : ", data);
-                if (data && data.length > 0) {
-                    allFactures = data;
-                    afficherFactures(data);
-                    populateYearFilter(data);
-                } else {
-                    $('#facture-table-body').html('<tr><td colspan="8">Aucune facture trouvée.</td></tr>');
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error("Erreur AJAX:", error);
-            }
-        });
-    }
-
-    // Remplir le filtre d'année
-    function populateYearFilter(factures) {
-        const years = [...new Set(factures.map(f => f.Annee))].sort((a, b) => b - a);
-        const $yearSelect = $('#filterYear').empty().append('<option value="">Toutes les années</option>');
-        years.forEach(year => {
-            $yearSelect.append(`<option value="${year}">${year}</option>`);
-        });
-    }
-
-    // Afficher les factures
-    function afficherFactures(factures) {
-        let html = factures.length > 0 ? factures.map(facture => `
-            <tr>
-                <td>${facture.Mois} / ${facture.Annee}</td>
-                <td>${facture.ID_Compteur}</td>
-                <td>${facture.Nom} ${facture.Prénom}</td>
-                <td>${facture.Date_émission}</td>
-                <td>${facture.Qté_consommé} kWh</td>
-                <td>${facture.Prix_TTC} DH</td>
-                <td>
-                    <button class="payer-btn" data-id="${facture.ID_Facture}">Payer</button>
-                </td>
-                <td>
-                    <button class="download-btn" data-id="${facture.ID_Facture}">Télécharger</button>
-                </td>
-            </tr>
-        `).join('') : '<tr><td colspan="8">Aucune facture trouvée.</td></tr>';
+    $(document).ready(function() {
+        let allFactures = [];
         
-        $('#facture-table-body').html(html);
-    }
-
-    // Appliquer les filtres
-    function applyFilters() {
-        const searchText = $('#globalSearch').val().toLowerCase();
-        const yearFilter = $('#filterYear').val();
-        const monthFilter = $('#filterMonth').val();
-        const amountFilter = $('#filterAmount').val();
-
-        const filtered = allFactures.filter(facture => {
-            // Filtre de recherche globale
-            if (searchText && !(
-                facture.Nom.toLowerCase().includes(searchText) ||
-                facture.Prénom.toLowerCase().includes(searchText) ||
-                facture.ID_Compteur.toString().includes(searchText))
-            ) {
-                return false;
-            }
-
-            // Filtre par année (exact match)
-            if (yearFilter && facture.Annee.toString() !== yearFilter) {
-                return false;
-            }
-
-            // Filtre par mois (exact match)
-            if (monthFilter && facture.Mois.toString() !== monthFilter) {
-                return false;
-            }
-
-            // Filtre par montant
-            if (amountFilter) {
-                const amount = parseFloat(facture.Prix_TTC);
-                if (amountFilter === '0-500' && (amount < 0 || amount > 500)) return false;
-                if (amountFilter === '500-1000' && (amount < 500 || amount > 1000)) return false;
-                if (amountFilter === '1000-2000' && (amount < 1000 || amount > 2000)) return false;
-                if (amountFilter === '2000+' && amount < 2000) return false;
-            }
-
-            return true;
-        });
-
-        afficherFactures(filtered);
-    }
-
-    // Écouteurs d'événements
-    $('#globalSearch').on('keyup', applyFilters);
-    $('#filterYear, #filterMonth, #filterAmount').on('change', applyFilters);
-
-    $('#resetFilters').on('click', function() {
-        $('#globalSearch').val('');
-        $('#filterYear').val('');
-        $('#filterMonth').val('');
-        $('#filterAmount').val('');
-        afficherFactures(allFactures);
-    });
-
-    // Chargement initial
-    chargerFactures();
-
-    // Rafraîchir toutes les 5 secondes
-    setInterval(chargerFactures, 5000);
-
-    // [Conserver vos autres gestionnaires d'événements...]
-    $(document).on('click', '.payer-btn', function() {
-        let factureID = $(this).data('id');
-        $.ajax({
-            url: '../Traitement/traitement_listefacture.php',
-            type: 'GET',
-            data: { action: 'payerFacture', factureID: factureID },
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === "success") {
-                    chargerFactures();
-                } else {
-                    alert("Erreur lors du paiement de la facture.");
+        function chargerFactures() {
+            $.ajax({
+                url: '../Traitement/traitement_listefacture.php',
+                type: 'GET',
+                data: { action: 'getFactures' },
+                dataType: 'json',
+                success: function(response) {
+                    console.log(response);  // Affiche la réponse complète du serveur
+                    if (response.status === "success") {
+                        allFactures = response.data;
+                        afficherFactures(response.data);
+                        populateYearFilter(response.data);
+                    } else {
+                        showError(response.message || "Erreur de chargement");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    showError("Erreur de connexion au serveur");
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error("Erreur AJAX : ", error);
-                alert("Une erreur s'est produite lors du paiement.");
+            });
+        }
+
+        function afficherFactures(factures) {
+            const tbody = $('#facture-table-body').empty();
+            
+            if (factures.length === 0) {
+                tbody.append('<tr><td colspan="8">Aucune facture trouvée</td></tr>');
+                return;
             }
+
+            factures.forEach(facture => {
+                // Affichage des données dans le tableau
+                const row = `
+                <tr>
+                    <td>${facture.Mois}/${facture.Annee}</td>
+                    <td>${facture.ID_Compteur}</td>
+                    <td>${facture.Nom || 'Nom non disponible'} ${facture.Prenom || 'Prénom non disponible'}</td>
+                    <td>${facture.Date_émission}</td>
+                    <td>${facture.Qté_consommé || 'Consommation non disponible'} kWh</td>
+                    <td>${facture.Prix_TTC} DH</td>
+                    <td>
+                        <span class="badge ${facture.Statut_paiement === 'paye' ? 'bg-success' : 'bg-warning'}">
+                            ${facture.Statut_paiement}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary download-btn" data-id="${facture.ID_Facture}">
+                            <i class="fas fa-download"></i> PDF
+                        </button>
+                    </td>
+                </tr>`;
+                tbody.append(row);
+            });
+        }
+
+        // Fonction pour télécharger la facture au format PDF
+        $(document).on('click', '.download-btn', function() {
+            const factureID = $(this).data('id');
+            if (!factureID || isNaN(factureID)) {
+                alert("Facture invalide !");
+                return;
+            }
+            window.location.href = `../Traitement/telecharger_facture.php?factureID=${factureID}`;
         });
-    });
 
-    $(document).on('click', '.download-btn', function() {
-        let factureID = $(this).data('id');
-        window.location.href = `../Traitement/telecharger_facture.php?factureID=${factureID}`;
-    });
+        // Redirection pour consulter les anciennes factures
+        $('#consulterAnciennesFactures').click(function() {
+            window.location.href = 'ListeFacturesPayees.php';
+        });
 
-    $('#consulterAnciennesFactures').on('click', function() {
-        window.location.href = '../Traitement/traitement_listefacture.php?action=consulterAnciennesFactures';
+        // Charger les factures au démarrage et toutes les 30 secondes
+        chargerFactures();
+        setInterval(chargerFactures, 30000);
     });
-});
-</script>
+    </script>
 </body>
-</html>  
+</html>

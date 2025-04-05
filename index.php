@@ -1,3 +1,4 @@
 <?php
-header('Location:Traitement/traitement_listefacture.php');
+header("Location: IHM/index.php");
+exit;
 ?>

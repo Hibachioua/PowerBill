@@ -1,61 +1,88 @@
 <?php
+session_start();
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/error.log');
+error_reporting(E_ALL);
 
-if (empty($_GET['action'])) {
-    header('Location: ../IHM/ListeFactures.php');
-    exit;  // Assure-toi que le script s'arrête après la redirection
-}
+require_once __DIR__ . '/../BD/connexion.php';
+require_once __DIR__ . '/../BD/Factures.php';
 
-header('Content-Type: application/json'); // Toujours retourner du JSON
+header('Content-Type: application/json');
 
-require_once "../BD/FactureModel.php";
-require_once "../BD/connexion.php";
-
-$model = new FactureModel();
-
-// Récupérer les factures non payées (GET)
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'getFactures') {
-    $factures = $model->getNonPayes();
-    echo json_encode($factures);
-    exit;
-}
-
-// Mettre à jour le statut de paiement d'une facture (GET)
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'payerFacture') {
-    if (isset($_GET['factureID'])) {
-        $factureID = $_GET['factureID'];
-        if ($model->updateFacturePayee($factureID)) {
-            // Retourner une réponse JSON
-            echo json_encode(["status" => "success"]);
-            exit;
-        } else {
-            echo json_encode(["status" => "error", "message" => "Échec de la mise à jour de la facture."]);
-            exit;
-        }
-    } else {
-        echo json_encode(["status" => "error", "message" => "Facture ID manquant."]);
-        exit;
+try {
+    // Vérification de l'authentification
+    if (!isset($_SESSION['loggedIn']) || $_SESSION['loggedIn'] !== true) {
+        throw new Exception("Accès non autorisé - Session invalide");
     }
-}
 
-// Rediriger vers la page des factures payées (GET)
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'consulterAnciennesFactures') {
-    header('Location: ../IHM/ListeFacturesPayees.php');
-    exit;
-}
+    // Vérification du rôle client (ID_Role = 1)
+    if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 1) {
+        throw new Exception("Accès réservé aux clients");
+    }
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'getFacturesPayees') {
-    $factures = $model->getFacturesPayees();
-    echo json_encode($factures);
-    exit;
-}
+    if (!isset($_SESSION['user_id'])) {
+        throw new Exception("Identifiant client manquant");
+    }
 
-// Rediriger vers la page ListeFactures.php (GET)
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'retour') {
-    header('Location: ../IHM/ListeFactures.php');
-    exit;
-}
+    $clientId = $_SESSION['user_id'];
+    $pdo = connectDB();
 
-// Si aucune action n'est reconnue
-echo json_encode(["status" => "error", "message" => "Action non valide."]);
-exit;
-?>  
+    if (!$pdo) {
+        throw new Exception("Connexion DB impossible");
+    }
+
+    if (!isset($_GET['action'])) {
+        throw new Exception("Action non spécifiée");
+    }
+
+    switch ($_GET['action']) {
+        case 'getFactures':
+            $factures = getNonPayes($pdo, $clientId);
+            echo json_encode([
+                'status' => 'success',
+                'data' => $factures
+            ]);
+            break;
+            
+        case 'payerFacture':
+            $factureID = $_POST['factureID'] ?? null;
+            if (!$factureID) {
+                throw new Exception("ID facture manquant");
+            }
+            
+            if (!is_numeric($factureID)) {
+                throw new Exception("ID facture invalide");
+            }
+            
+            $success = payerFacture($pdo, (int)$factureID);
+            echo json_encode([
+                'status' => $success ? 'success' : 'error',
+                'message' => $success ? 'Paiement effectué' : 'Échec du paiement'
+            ]);
+            break;
+
+        case 'getFacturesPayees':
+            $factures = getFacturesPayees($pdo, $clientId);
+            echo json_encode([
+                'status' => 'success',
+                'data' => $factures
+            ]);
+            break;
+        
+        case 'retour':
+                header('Location: ../IHM/ListeFactures.php');
+                exit();
+                break;
+
+        default:
+            throw new Exception("Action non reconnue");
+    }
+} catch (Exception $e) {
+    error_log("Erreur: " . $e->getMessage());
+    echo json_encode([
+        'status' => 'error',
+        'message' => $e->getMessage()
+    ]);
+}
+?>

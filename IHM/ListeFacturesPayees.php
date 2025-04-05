@@ -104,29 +104,33 @@
        $(document).ready(function () {
     let allFactures = []; // Stocker toutes les factures pour le filtrage
 
-    // Fonction pour charger les factures
     function chargerFactures() {
-        $.ajax({
-            url: '../Traitement/traitement_listefacture.php',
-            type: 'GET',
-            data: { action: 'getFactures' },
-            dataType: 'json',
-            success: function (data) {
-                console.log("Données reçues : ", data);
-                if (data && data.length > 0) {
-                    allFactures = data;
-                    afficherFactures(data);
-                    populateYearFilter(data);
-                } else {
-                    $('#facture-table-body').html('<tr><td colspan="8">Aucune facture trouvée.</td></tr>');
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error("Erreur AJAX:", error);
+    $.ajax({
+        url: '../Traitement/traitement_listefacture.php',
+        type: 'GET',
+        data: { action: 'getFacturesPayees' },
+        dataType: 'json',
+        success: function (data) {
+            console.log("Données reçues : ", data);
+            
+            if (data.status === 'success' && data.data && data.data.length > 0) {
+                allFactures = data.data;
+                afficherFactures(data.data);
+                populateYearFilter(data.data);
+            } else {
+                $('#facture-table-body').html(
+                    '<tr><td colspan="8">Aucune facture trouvée.</td></tr>'
+                );
             }
-        });
-    }
-
+        },
+        error: function (xhr, status, error) {
+            console.error("Erreur AJAX:", error);
+            $('#facture-table-body').html(
+                '<tr><td colspan="8">Erreur lors du chargement des factures</td></tr>'
+            );
+        }
+    });
+}
     // Remplir le filtre d'année
     function populateYearFilter(factures) {
         const years = [...new Set(factures.map(f => f.Annee))].sort((a, b) => b - a);
@@ -142,7 +146,7 @@
             <tr>
                 <td>${facture.Mois} / ${facture.Annee}</td>
                 <td>${facture.ID_Compteur}</td>
-                <td>${facture.Nom} ${facture.Prénom}</td>
+                <td>${facture.Nom} ${facture.Prenom}</td>
                 <td>${facture.Date_émission}</td>
                 <td>${facture.Qté_consommé} kWh</td>
                 <td>${facture.Prix_TTC} DH</td>
