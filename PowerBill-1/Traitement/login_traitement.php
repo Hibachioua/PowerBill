@@ -1,30 +1,30 @@
 <?php
-// Traitement/login_traitement.php
+require_once "../BD/connexion.php";
+require_once "../BD/loginModel.php";
+
 session_start();
-require_once __DIR__ . "/../BD/connexion.php";
-require_once __DIR__ . "/../BD/loginModel.php";
 
 function getRedirectPath($roleId) {
     switch ($roleId) {
         case 1: // Client
             return '../IHM/Client/client_dashboard.php';
         case 2: // Agent
-            return '../IHM/Agent/agent_dashboard.php';
+            return '../IHM/agent_dashboard.php';
         case 3: // Fournisseur
-            return '../IHM/Fournisseur/fournisseur_dashboard.php';
+            return '../IHM/fournisseur_dashboard.php';
         default:
-            return '../IHM/index.php'; // Page par défaut
+            return '../IHM/dashboard.php'; // Page par défaut
     }
 }
 
+// Si c'est une soumission de formulaire (POST)
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = filter_var($_POST["email"], FILTER_SANITIZE_EMAIL);
     $password = $_POST["password"];
     $remember = isset($_POST["remember"]) ? true : false;
     
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $_SESSION['login_error'] = "Format d'email invalide";
-        header("Location: ../IHM/login.php");
+        header("Location: ../IHM/login.php?error=" . urlencode("Format d'email invalide"));
         exit();
     }
     
@@ -32,11 +32,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $connexion = connectDB();
     
     if ($connexion === null) {
-        header("Location: ../IHM/login.php");
+        header("Location: ../IHM/login.php?error=" . urlencode("Erreur de connexion à la base de données"));
         exit();
     }
     
-    // Utiliser la fonction d'authentification du modèle
     $result = authenticateUser($connexion, $email, $password, $remember);
     
     if ($result['success']) {
@@ -45,12 +44,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     } else {
         // Échec de l'authentification
-        $_SESSION['login_error'] = $result['message'];
-        header("Location: ../IHM/login.php");
+        header("Location: ../IHM/login.php?error=" . urlencode($result['message']));
         exit();
     }
-} else {
-    // Redirection si accès direct au script
+} 
+else {
     header("Location: ../IHM/login.php");
     exit();
 }
