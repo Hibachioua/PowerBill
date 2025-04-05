@@ -1,3 +1,4 @@
+<?php include "Mise_en_page/header.php"; ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
