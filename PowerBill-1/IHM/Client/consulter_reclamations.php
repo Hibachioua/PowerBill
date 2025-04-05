@@ -1,17 +1,13 @@
 <?php 
-session_start();
-include('../Mise_en_page/header_client.php'); 
+// D'abord, on inclut auth_check.php qui va gérer la session et vérifier l'authentification
+require_once "../../Traitement/auth_check.php";
 
-// Vérifier si l'utilisateur est connecté
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../Client/client_dashboard.php");
-    exit();
-}
+// Pas besoin de démarrer une session ici, c'est déjà fait dans auth_check.php
+// Pas besoin non plus de vérifier si l'utilisateur est connecté, c'est déjà fait dans auth_check.php
 
 // Récupérer l'ID du client depuis la session
 $id_client = $_SESSION['user_id'];
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -20,8 +16,7 @@ $id_client = $_SESSION['user_id'];
     <title>Consulter mes réclamations</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
-
-<style>
+    <style>
     body {
         font-family: 'Poppins', 'Arial', sans-serif;
         margin: 0;
@@ -209,71 +204,75 @@ $id_client = $_SESSION['user_id'];
             padding: 6px;
         }
     }
-</style>
-</head>
+</style></head>
 
 <body>
-<div class="containerListe">
-    <div class="btn-container">
-        <form action="../../Traitement/traitement_reclamation.php" method="GET">
-            <input type="hidden" name="action" value="creer_reclamation">
-            <input type="hidden" name="id_client" value="<?php echo $id_client; ?>">
-            <button type="submit" class="btn btn-primary">Nouvelle réclamation</button>
-        </form>
+<?php include __DIR__ . "/../Mise_en_page/header_client.php"; ?>
+    
+    <div class="containerListe">
+        <div class="btn-container">
+            <a href="../../Traitement/traitement_reclamation.php?action=creer_reclamation" class="btn btn-primary">Nouvelle réclamation</a>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                        <th>Réponse</th>
+                    </tr>
+                </thead>
+                <tbody id="reclamationsTable">
+                    <!-- Les réclamations seront insérées ici -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
-
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Description</th>
-                    <th>Date</th>
-                    <th>Statut</th>
-                    <th>Réponse</th>
-                </tr>
-            </thead>
-            <tbody id="reclamationsTable">
-                <!-- Les réclamations seront insérées ici -->
-            </tbody>
-        </table>
-    </div>
-
-</div>
-
-<script>
+    <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const id_client = <?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'null'; ?>;
-
-    if (!id_client) {
-        alert("Utilisateur non connecté !");
-        window.location.href = "../Client/client_dashboard.php";
-        return;
-    }
-
-    fetch(`../../Traitement/traitement_reclamation.php?action=consulter_reclamations&id_client=${id_client}`)
-    .then(response => response.json())
+    console.log("Chargement des réclamations...");
+    
+    // Requête AJAX pour récupérer les réclamations
+    fetch('../../Traitement/traitement_reclamation.php?action=consulter_reclamations')
+    .then(response => {
+        console.log("Statut de la réponse:", response.status);
+        // Débogage - afficher le texte brut avant de tenter de le parser en JSON
+        return response.text().then(text => {
+            console.log("Réponse brute:", text);
+            try {
+                // Essayer de parser le texte en JSON
+                return JSON.parse(text);
+            } catch(e) {
+                // Si le parsing échoue, afficher l'erreur
+                throw new Error("Réponse non-JSON reçue: " + text);
+            }
+        });
+    })
     .then(data => {
+        console.log("Données JSON traitées:", data);
         const tableBody = document.getElementById("reclamationsTable");
-        tableBody.innerHTML = ""; 
+        tableBody.innerHTML = "";
 
-        if (data.error) {
+        if (data && data.error) {
             tableBody.innerHTML = `<tr><td colspan="5">${data.error}</td></tr>`;
             return;
         }
 
-        if (data.length === 0) {
+        if (!Array.isArray(data) || data.length === 0) {
             tableBody.innerHTML = `<tr><td colspan="5">Aucune réclamation trouvée.</td></tr>`;
             return;
         }
 
         data.forEach(reclamation => {
             const row = `<tr>
-                <td>${reclamation.Type_Réclamation}</td>
-                <td>${reclamation.Description}</td>
-                <td>${reclamation.Date_Réclamation}</td>
-                <td>${reclamation.Statut}</td>
+                <td>${reclamation.Type_Réclamation || ''}</td>
+                <td>${reclamation.Description || ''}</td>
+                <td>${reclamation.Date_Réclamation || ''}</td>
+                <td>${reclamation.Statut || ''}</td>
                 <td>${reclamation.Réponse_Fournisseur ? reclamation.Réponse_Fournisseur : "En attente"}</td>
             </tr>`;
             tableBody.innerHTML += row;
@@ -281,14 +280,11 @@ document.addEventListener("DOMContentLoaded", function() {
     })
     .catch(error => {
         console.error("Erreur:", error);
+        document.getElementById("reclamationsTable").innerHTML = 
+            `<tr><td colspan="5">Erreur lors du chargement des réclamations: ${error.message}</td></tr>`;
     });
 });
 </script>
-
-
-
     <?php include('../Mise_en_page/footer.php'); ?>
 </body>
 </html>
-
-
