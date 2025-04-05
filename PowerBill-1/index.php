@@ -1,3 +1,3 @@
 <?php
-header('Location:Traitement/index.php');
+header('Location:IHM/index.php');
 ?>
