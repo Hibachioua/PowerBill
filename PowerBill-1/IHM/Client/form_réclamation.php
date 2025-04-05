@@ -1,5 +1,6 @@
 <?php 
 session_start();
+include('../Mise_en_page/header_client.php'); 
 ?>
 
 <!DOCTYPE html>
