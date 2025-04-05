@@ -1,5 +1,4 @@
 <?php
-require_once "../Traitement/auth_check.php";
 require_once "../Traitement/history_traitement.php";
 require_once "../Traitement/sidebar_controller.php";
 
@@ -233,7 +232,7 @@ $hasFilters = hasActiveFilters($filtres);
                 </div>
             <?php endif; ?>
             
-            <?php if (!empty($consommations)): ?>
+            <!-- <?php if (!empty($consommations)): ?>
                 <div class="export-buttons">
                     <button class="btn btn-sm btn-outline-success btn-export">
                         <i class="fas fa-file-excel"></i> Exporter en Excel
@@ -245,7 +244,7 @@ $hasFilters = hasActiveFilters($filtres);
                         <i class="fas fa-print"></i> Imprimer
                     </button>
                 </div>
-            <?php endif; ?>
+            <?php endif; ?> -->
         </div>
         
         <!-- Tableau des consommations -->

@@ -1,8 +1,3 @@
-<?php
-// Démarrer la session pour afficher les erreurs potentielles
-session_start();
-include "header.php";
-?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -12,7 +7,11 @@ include "header.php";
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
+</head>
 <body>
+
+<?php include "header.php"; ?>
+
 <!-- Section de Connexion -->
 <section class="login-section">
     <div class="container">
@@ -20,17 +19,12 @@ include "header.php";
             <div class="col-md-6 mx-auto">
                 <div class="login-card">
                     <div class="login-header">
-                        <h1>Espace Client</h1>
+                        <h1>Connexion</h1>
                         <p>Connectez-vous à votre compte PowerBill</p>
                     </div>
                     
-                    <?php if(isset($_SESSION['login_error'])): ?>
-                    <div class="alert alert-danger">
-                        <?php echo $_SESSION['login_error']; unset($_SESSION['login_error']); ?>
-                    </div>
-                    <?php endif; ?>
+                    <div id="error-container" class="alert alert-danger" style="display: none;"></div>
                     
-                    <!-- Notez le changement dans l'action du formulaire -->
                     <form action="../Traitement/login_traitement.php" method="POST" class="login-form">
                         <div class="form-group mb-3">
                             <label for="email"><i class="fas fa-envelope"></i> Adresse email</label>
@@ -68,9 +62,9 @@ include "header.php";
     </div>
 </section>
 
-
 <?php include "footer.php"; ?>
 <script src="assets/js/login.js"></script>
+
 
 </body>
 </html>
