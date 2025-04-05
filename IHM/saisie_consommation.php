@@ -1,72 +1,91 @@
-<?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] != 1) {
-    header("Location: login.php");
-    exit();
-}
-?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consommation - PowerBill</title>
-    <link rel="stylesheet" href="assets/styles.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
 
 <div class="consumption-container">
     <h2>Enregistrez votre consommation du mois</h2>
 
-    <!-- Affichage des messages d'erreur/succès -->
     <div id="messageContainer"></div>
 
     <form id="consumptionForm" action="../Traitement/consommation_traitement.php" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
-    
-    <!-- Sélection de l'ID Compteur -->
-    <div class="form-group">
-        <label for="ID_Compteur">ID Compteur :</label>
-        <select id="ID_Compteur" name="ID_Compteur" required onchange="fetchLastCounterImage(this.value)">
-            <option value="" disabled selected>Chargement...</option>
-        </select>
-    </div>
+        <div class="form-group">
+            <label for="ID_Compteur">ID Compteur :</label>
+            <select id="ID_Compteur" name="ID_Compteur" required onchange="fetchLastCounterImage(this.value)">
+                <option value="" disabled selected>Chargement...</option>
+            </select>
+        </div>
 
-    <input type="hidden" id="Mois" name="Mois" value="<?= date('n'); ?>">
-    <input type="hidden" id="Annee" name="Annee" value="<?= date('Y'); ?>">
+        <input type="hidden" id="Mois" name="Mois" value="">
+        <input type="hidden" id="Annee" name="Annee" value="">
 
-    <div class="form-group">
-        <label for="Qté_consommé">Quantité Consommée (kWh):</label>
-        <input type="number" id="Qté_consommé" name="Qté_consommé" step="0.01" min="0" required>
-    </div>
-    
-    <div class="form-group">
-        <label for="counterPicture">Photo du compteur:</label>
-        <input type="file" id="counterPicture" name="counterPicture" accept="image/*" required>
-    </div>
-    
-    <button type="submit" id="submitBtn" class="btn-dark">Enregistrer</button>
-</form>
-
+        <div class="form-group">
+            <label for="Qté_consommé">Quantité Consommée (kWh):</label>
+            <input type="number" id="Qté_consommé" name="Qté_consommé" step="0.01" min="0" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="counterPicture">Photo du compteur:</label>
+            <input type="file" id="counterPicture" name="counterPicture" accept="image/*" required>
+        </div>
+        
+        <button type="submit" id="submitBtn" class="btn-dark">Enregistrer</button>
+    </form>
 </div>
 
-<!-- Pop-up pour afficher l'image du compteur -->
 <div id="imagePopup" class="popup-container" style="display: none;">
     <div id="lastCounterImage" class="popup-content"></div>
 </div>
 
 <script>
-// Récupérer dynamiquement les compteurs via AJAX
+document.addEventListener('DOMContentLoaded', () => {
+    const now = new Date();
+    document.getElementById('Mois').value = now.getMonth() + 1;
+    document.getElementById('Annee').value = now.getFullYear();
+    fetchCompteurs();
+});
+
 async function fetchCompteurs() {
+    const select = document.getElementById('ID_Compteur');
+    const messageContainer = document.getElementById('messageContainer');
+    
+    select.innerHTML = '<option value="" disabled selected>Chargement...</option>';
+    messageContainer.innerHTML = '';
+
     try {
-        const response = await fetch('../Traitement/consommation_traitement.php?action=get_compteurs');
-        const data = await response.json();
-
-        const select = document.getElementById('ID_Compteur');
-        select.innerHTML = '<option value="" disabled selected>Choisissez votre compteur</option>';
-
-        if (!data.success) {
-            throw new Error(data.error || 'Impossible de récupérer les compteurs.');
+        const response = await fetch('../Traitement/consommation_traitement.php?action=get_compteurs', {
+            credentials: 'include',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        if (response.redirected) {
+            window.location.href = response.url;
+            return;
         }
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP ${response.status}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Réponse non-JSON:', text);
+            throw new Error('Format de réponse inattendu');
+        }
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error(data.error || 'Erreur inconnue du serveur');
+        }
+
+        // Mettre à jour le select
+        select.innerHTML = data.compteurs.length > 0
+            ? '<option value="" disabled selected>Sélectionnez votre compteur</option>'
+            : '<option value="" disabled selected>Aucun compteur disponible</option>';
 
         data.compteurs.forEach(compteur => {
             const option = document.createElement('option');
@@ -77,11 +96,13 @@ async function fetchCompteurs() {
 
     } catch (error) {
         console.error('Erreur:', error);
-        document.getElementById('messageContainer').innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+        select.innerHTML = '<option value="" disabled selected>Erreur de chargement</option>';
+        messageContainer.innerHTML = `
+            <div class="alert alert-danger">
+                Erreur lors du chargement des compteurs: ${error.message}
+            </div>`;
     }
 }
-
-// Récupérer la dernière image associée à un compteur
 async function fetchLastCounterImage(compteurId) {
     const popup = document.getElementById('imagePopup');
     const imageContainer = document.getElementById('lastCounterImage');
@@ -124,8 +145,12 @@ async function fetchLastCounterImage(compteurId) {
         `;
     }
 }
+function showMessage(message, type = 'success') {
+    const container = document.getElementById('messageContainer');
+    container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+    setTimeout(() => container.innerHTML = '', 5000);
+}
 
-// Validation du formulaire pour éviter la double soumission
 function validateForm() {
     document.getElementById('submitBtn').disabled = true;
     return true;
@@ -135,23 +160,14 @@ function closePopup() {
     document.getElementById('imagePopup').style.display = 'none';
 }
 
-document.getElementById('imagePopup').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closePopup();
-    }
+document.getElementById('imagePopup').addEventListener('click', (e) => {
+    if (e.target === this) closePopup();
 });
 
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closePopup();
-    }
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePopup();
 });
-
-// Charger les compteurs au chargement de la page
-document.addEventListener('DOMContentLoaded', fetchCompteurs);
 </script>
 
 </body>
 </html>
-
-<?php include "footer.php"; ?>

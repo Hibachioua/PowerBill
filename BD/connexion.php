@@ -5,7 +5,7 @@ function connectDB() {
     $port          = "3307"; 
     $utilisateur   = "root";
     $motdepasse    = "";
-    $basededonnees = "powerbill2";
+    $basededonnees = "powerbill";
 
     try {
         $pdo = new PDO("mysql:host=$serveur;port=$port;dbname=$basededonnees", $utilisateur, $motdepasse);
