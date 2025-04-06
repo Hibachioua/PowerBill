@@ -178,7 +178,7 @@
 
         // Charger les factures au démarrage et toutes les 30 secondes
         chargerFactures();
-        setInterval(chargerFactures, 30000);
+        setInterval(chargerFactures, 5000);
     });
     </script>
 </body>

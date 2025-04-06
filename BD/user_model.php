@@ -16,7 +16,7 @@ function getAllUsers() {
             
             // Requête simplifiée
             $stmt = $connexion->query("
-                SELECT u.ID_Utilisateur, c.Nom, c.Prenom, c.Adresse, u.Email
+                SELECT u.ID_Utilisateur, c.Nom, c.Prenom,c.CIN,c.Adresse, u.Email
                 FROM utilisateur u
                 INNER JOIN client c ON u.ID_Utilisateur = c.ID_Utilisateur
                 WHERE u.ID_Role = 1
@@ -79,7 +79,7 @@ function emailExists($email, $excludeUserId = null) {
 /**
  * Ajoute un nouvel utilisateur (client)
  */
-function addUser($nom, $prenom, $email, $password, $adresse) {
+function addUser($nom, $prenom, $email, $password,$CIN, $adresse) {
     $connexion = connectDB();
     
     if (!$connexion) {
@@ -115,12 +115,13 @@ function addUser($nom, $prenom, $email, $password, $adresse) {
         
         // 2. Insérer dans la table client
         $stmtClient = $connexion->prepare("
-            INSERT INTO client (Nom, Prenom, Adresse, ID_Utilisateur) 
-            VALUES (:nom, :prenom, :adresse, :userId)
+            INSERT INTO client (Nom, Prenom, Adresse,CIN, ID_Utilisateur) 
+            VALUES (:nom, :prenom, :adresse,:CIN, :userId)
         ");
         $stmtClient->bindParam(':nom', $nom);
         $stmtClient->bindParam(':prenom', $prenom);
         $stmtClient->bindParam(':adresse', $adresse);
+        $stmtClient->bindParam(':CIN', $CIN);
         $stmtClient->bindParam(':userId', $userId);
         $stmtClient->execute();
         
@@ -143,7 +144,7 @@ function addUser($nom, $prenom, $email, $password, $adresse) {
 }
 
 
-function updateUser($userId, $nom, $prenom, $email, $password, $adresse) {
+function updateUser($userId, $nom, $prenom, $email, $password,$CIN, $adresse) {
     $connexion = connectDB();
     
     if (!$connexion) {
@@ -187,12 +188,13 @@ function updateUser($userId, $nom, $prenom, $email, $password, $adresse) {
         // 2. Mettre à jour la table client
         $stmtClient = $connexion->prepare("
             UPDATE client 
-            SET Nom = :nom, Prenom = :prenom, Adresse = :adresse
+            SET Nom = :nom, Prenom = :prenom,CIN= :CIN Adresse = :adresse
             WHERE ID_Utilisateur = :id
         ");
         $stmtClient->bindParam(':nom', $nom);
         $stmtClient->bindParam(':prenom', $prenom);
         $stmtClient->bindParam(':adresse', $adresse);
+        $stmtClient->bindParam(':CIN', $CIN);
         $stmtClient->bindParam(':id', $userId);
         $stmtClient->execute();
         

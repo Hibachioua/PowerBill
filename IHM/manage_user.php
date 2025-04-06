@@ -3,15 +3,12 @@
 require_once "../Traitement/auth_check.php";
 require_once "../Traitement/user_traitement.php";
 
-// Vérifier que l'utilisateur a le rôle fournisseur
 checkUserAccess(3);
 
-// Traiter les actions (ajout, modification, suppression)
 $actionResult = processUserAction();
 $message = $actionResult['message'];
 $messageType = $actionResult['messageType'];
 
-// Préparer les données pour la vue
 $viewData = prepareUserData();
 $users = $viewData['users'];
 ?>
@@ -25,8 +22,6 @@ $users = $viewData['users'];
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/manage_user.css">
-
-    
 </head>
 <body>
     <?php include "sidebar.php"; ?>
@@ -57,6 +52,7 @@ $users = $viewData['users'];
                             <th>ID</th>
                             <th>Nom</th>
                             <th>Prénom</th>
+                            <th>CIN</th>
                             <th>Email</th>
                             <th>Adresse</th>
                             <th>Actions</th>
@@ -68,6 +64,7 @@ $users = $viewData['users'];
                                 <td><?php echo $user['ID_Utilisateur']; ?></td>
                                 <td><?php echo htmlspecialchars($user['Nom']); ?></td>
                                 <td><?php echo htmlspecialchars($user['Prenom']); ?></td>
+                                <td><?php echo htmlspecialchars($user['CIN']); ?></td>
                                 <td><?php echo htmlspecialchars($user['Email']); ?></td>
                                 <td><?php echo htmlspecialchars($user['Adresse']); ?></td>
                                 <td class="actions">
@@ -75,6 +72,7 @@ $users = $viewData['users'];
                                             data-id="<?php echo $user['ID_Utilisateur']; ?>"
                                             data-nom="<?php echo htmlspecialchars($user['Nom']); ?>"
                                             data-prenom="<?php echo htmlspecialchars($user['Prenom']); ?>"
+                                            data-cin="<?php echo htmlspecialchars($user['CIN']); ?>"
                                             data-email="<?php echo htmlspecialchars($user['Email']); ?>"
                                             data-adresse="<?php echo htmlspecialchars($user['Adresse']); ?>">
                                         <i class="fas fa-edit"></i>
@@ -83,7 +81,8 @@ $users = $viewData['users'];
                                     <button type="button" class="btn-action btn-delete delete-user-btn"
                                             data-id="<?php echo $user['ID_Utilisateur']; ?>"
                                             data-nom="<?php echo htmlspecialchars($user['Nom']); ?>"
-                                            data-prenom="<?php echo htmlspecialchars($user['Prenom']); ?>">
+                                            data-prenom="<?php echo htmlspecialchars($user['Prenom']); ?>"
+                                            data-cin="<?php echo htmlspecialchars($user['CIN']); ?>">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -92,7 +91,7 @@ $users = $viewData['users'];
                         
                         <?php if (empty($users)): ?>
                             <tr>
-                                <td colspan="6" class="text-center">Aucun client trouvé</td>
+                                <td colspan="7" class="text-center">Aucun client trouvé</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -100,8 +99,8 @@ $users = $viewData['users'];
             </div>
         </div>
     </div>
-    
-    <!-- Modal Ajout Utilisateur -->
+
+    <!-- Modals -->
     <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -112,7 +111,6 @@ $users = $viewData['users'];
                 <div class="modal-body">
                     <form action="" method="POST">
                         <input type="hidden" name="action" value="add">
-                        <!-- Rôle fixé à Client (1) -->
                         <input type="hidden" name="role" value="1">
                         
                         <div class="mb-3">
@@ -123,6 +121,13 @@ $users = $viewData['users'];
                         <div class="mb-3">
                             <label for="prenom" class="form-label">Prénom</label>
                             <input type="text" class="form-control" id="prenom" name="prenom" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cin" class="form-label">CIN</label>
+                            <input type="text" class="form-control" id="cin" name="cin" 
+                                   pattern="[A-Za-z0-9]{8}" 
+                                   title="8 caractères alphanumériques" required>
                         </div>
                         
                         <div class="mb-3">
@@ -149,8 +154,7 @@ $users = $viewData['users'];
             </div>
         </div>
     </div>
-    
-    <!-- Modal Modification Utilisateur -->
+
     <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -162,7 +166,6 @@ $users = $viewData['users'];
                     <form action="" method="POST">
                         <input type="hidden" name="action" value="edit">
                         <input type="hidden" name="user_id" id="edit_user_id">
-                        <!-- Maintenir le rôle client -->
                         <input type="hidden" name="role" value="1">
                         
                         <div class="mb-3">
@@ -173,6 +176,13 @@ $users = $viewData['users'];
                         <div class="mb-3">
                             <label for="edit_prenom" class="form-label">Prénom</label>
                             <input type="text" class="form-control" id="edit_prenom" name="prenom" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="edit_cin" class="form-label">CIN</label>
+                            <input type="text" class="form-control" id="edit_cin" name="cin" 
+                                   pattern="[A-Za-z0-9]{8}" 
+                                   title="8 caractères alphanumériques" required>
                         </div>
                         
                         <div class="mb-3">
@@ -186,7 +196,7 @@ $users = $viewData['users'];
                         </div>
                         
                         <div class="mb-3">
-                            <label for="edit_password" class="form-label">Mot de passe (laisser vide pour ne pas modifier)</label>
+                            <label for="edit_password" class="form-label">Mot de passe</label>
                             <input type="password" class="form-control" id="edit_password" name="password">
                         </div>
                         
@@ -199,8 +209,7 @@ $users = $viewData['users'];
             </div>
         </div>
     </div>
-    
-    <!-- Modal Suppression Utilisateur -->
+
     <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -209,7 +218,12 @@ $users = $viewData['users'];
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Êtes-vous sûr de vouloir supprimer le client <strong><span id="delete_user_name"></span></strong> ?</p>
+                    <p>Êtes-vous sûr de vouloir supprimer le client :</p>
+                    <ul>
+                        <li>Nom: <strong><span id="delete_user_name"></span></strong></li>
+                        <li>Prénom: <strong><span id="delete_user_prenom"></span></strong></li>
+                        <li>CIN: <strong><span id="delete_user_cin"></span></strong></li>
+                    </ul>
                     <p class="text-danger">Cette action est irréversible.</p>
                     
                     <form action="" method="POST">
@@ -225,79 +239,46 @@ $users = $viewData['users'];
             </div>
         </div>
     </div>
-    
-    <!-- Chargement des scripts dans le bon ordre -->
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
     
     <script>
-        // Initialisation manuelle des modals au chargement du document
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialiser les objets Modal
-            var addUserModal = new bootstrap.Modal(document.getElementById('addUserModal'));
-            var editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
-            var deleteUserModal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
-            
-            // Gestionnaire pour le bouton d'ajout
-            document.getElementById('addUserBtn').addEventListener('click', function() {
-                addUserModal.show();
-            });
-            
-            // Gestionnaires pour les boutons d'édition
-            document.querySelectorAll('.edit-user-btn').forEach(function(button) {
+            const addUserModal = new bootstrap.Modal(document.getElementById('addUserModal'));
+            const editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+            const deleteUserModal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
+
+            document.getElementById('addUserBtn').addEventListener('click', () => addUserModal.show());
+
+            document.querySelectorAll('.edit-user-btn').forEach(button => {
                 button.addEventListener('click', function() {
-                    // Récupérer les données utilisateur
-                    var userId = this.getAttribute('data-id');
-                    var nom = this.getAttribute('data-nom');
-                    var prenom = this.getAttribute('data-prenom');
-                    var email = this.getAttribute('data-email');
-                    var adresse = this.getAttribute('data-adresse');
-                    
-                    // Mettre à jour les champs du formulaire
-                    document.getElementById('edit_user_id').value = userId;
-                    document.getElementById('edit_nom').value = nom;
-                    document.getElementById('edit_prenom').value = prenom;
-                    document.getElementById('edit_email').value = email;
-                    document.getElementById('edit_adresse').value = adresse || '';
-                    
-                    // Afficher le modal
+                    document.getElementById('edit_user_id').value = this.dataset.id;
+                    document.getElementById('edit_nom').value = this.dataset.nom;
+                    document.getElementById('edit_prenom').value = this.dataset.prenom;
+                    document.getElementById('edit_cin').value = this.dataset.cin;
+                    document.getElementById('edit_email').value = this.dataset.email;
+                    document.getElementById('edit_adresse').value = this.dataset.adresse;
                     editUserModal.show();
                 });
             });
-            
-            // Gestionnaires pour les boutons de suppression
-            document.querySelectorAll('.delete-user-btn').forEach(function(button) {
+
+            document.querySelectorAll('.delete-user-btn').forEach(button => {
                 button.addEventListener('click', function() {
-                    // Récupérer les données utilisateur
-                    var userId = this.getAttribute('data-id');
-                    var nom = this.getAttribute('data-nom');
-                    var prenom = this.getAttribute('data-prenom');
-                    
-                    // Mettre à jour les champs du formulaire
-                    document.getElementById('delete_user_id').value = userId;
-                    document.getElementById('delete_user_name').textContent = prenom + ' ' + nom;
-                    
-                    // Afficher le modal
+                    document.getElementById('delete_user_id').value = this.dataset.id;
+                    document.getElementById('delete_user_name').textContent = this.dataset.nom;
+                    document.getElementById('delete_user_prenom').textContent = this.dataset.prenom;
+                    document.getElementById('delete_user_cin').textContent = this.dataset.cin;
                     deleteUserModal.show();
                 });
             });
+
+            // Auto-close alerts
+            document.querySelectorAll('.alert').forEach(alert => {
+                setTimeout(() => new bootstrap.Alert(alert).close(), 5000);
+            });
         });
     </script>
-
-<script>
-    // Faire disparaître les alertes automatiquement après 5 secondes
-    document.addEventListener('DOMContentLoaded', function() {
-        const alerts = document.querySelectorAll('.alert');
-        
-        alerts.forEach(function(alert) {
-            setTimeout(function() {
-                // Utiliser Bootstrap pour fermer l'alerte avec animation
-                var bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            }, 5000); // 5000 ms = 5 secondes
-        });
-    });
-</script>
 </body>
 </html>

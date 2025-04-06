@@ -16,10 +16,11 @@ function processUserAction() {
                 $password = $_POST['password'];
                 $nom = htmlspecialchars($_POST['nom']);
                 $prenom = htmlspecialchars($_POST['prenom']);
+                $CIN = htmlspecialchars($_POST['cin']);
                 $adresse = htmlspecialchars($_POST['adresse']);
                 
                 // Appeler la fonction du modèle
-                $result = addUser($nom, $prenom, $email, $password, $adresse);
+                $result = addUser($nom, $prenom, $email, $password,$CIN, $adresse);
                 
                 // Stocker le message dans la session
                 $_SESSION['flash_message'] = $result['message'];
@@ -39,9 +40,10 @@ function processUserAction() {
                     $nom = htmlspecialchars($_POST['nom']);
                     $prenom = htmlspecialchars($_POST['prenom']);
                     $adresse = htmlspecialchars($_POST['adresse']);
+                    $CIN = htmlspecialchars($_POST['cin']);
                     
                     // Appeler la fonction du modèle
-                    $result = updateUser($userId, $nom, $prenom, $email, $password, $adresse);
+                    $result = updateUser($userId, $nom, $prenom, $email, $password,$CIN, $adresse);
                     
                     // Stocker le message dans la session
                     $_SESSION['flash_message'] = $result['message'];
