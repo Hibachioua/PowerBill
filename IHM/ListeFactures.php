@@ -11,69 +11,28 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/styleListeFacture.css?v=1.0">
     <link rel="stylesheet" href="assets/css/filter-styles.css">
+    <style>
+.notification {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    margin: 0;
+    border-radius: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+}
+    </style>
 </head>
 <body>
-<div class="containerListe">
-        <div class="title">
-            <h2>Vos Factures</h2>
-        </div>
-        <div class="btn-container">
-            <button id="consulterAnciennesFactures" class="btn btn-primary"><i class="fas fa-folder-open"></i> Consulter les anciennes factures</button>
-        </div>
-
-        <!-- Barre de recherche et filtres -->
-<div class="filters-container">
-    <div class="search-box">
-        <i class="fas fa-search"></i>
-        <input type="text" id="globalSearch" placeholder="Rechercher par nom, numéro de compteur, etc..." class="form-control">
-    </div>
-    
-    <div class="filter-row">
-
-        
-        <div class="filter-group">
-            <label for="filterYear">Année</label>
-            <select id="filterYear" class="form-select">
-                <option value="">Toutes les années</option>
-                <!-- Les options seront ajoutées dynamiquement -->
-            </select>
-        </div>
-        
-        <div class="filter-group">
-            <label for="filterMonth">Mois</label>
-            <select id="filterMonth" class="form-select">
-                <option value="">Tous les mois</option>
-                <option value="1">Janvier</option>
-                <option value="2">Février</option>
-                <option value="3">Mars</option>
-                <option value="4">Avril</option>
-                <option value="5">Mai</option>
-                <option value="6">Juin</option>
-                <option value="7">Juillet</option>
-                <option value="8">Août</option>
-                <option value="9">Septembre</option>
-                <option value="10">Octobre</option>
-                <option value="11">Novembre</option>
-                <option value="12">Décembre</option>
-            </select>
-        </div>
-        
-        <div class="filter-group">
-            <label for="filterAmount">Montant</label>
-            <select id="filterAmount" class="form-select">
-                <option value="">Tous les montants</option>
-                <option value="0-500">Moins de 500 DH</option>
-                <option value="500-1000">500 à 1000 DH</option>
-                <option value="1000-2000">1000 à 2000 DH</option>
-                <option value="2000+">Plus de 2000 DH</option>
-            </select>
-        </div>
-    </div>
-    
-    <div class="filter-actions">
-        <button id="resetFilters" class="btn btn-outline-secondary">Réinitialiser</button>
-        
-    </div>
+<div id="notification" class="notification" style="display:none;">
+    <span id="notification-message"></span>
+    <button id="notification-close" onclick="closeNotification()">×</button>
 </div>
     <div class="containerListe">
         <div class="title">
@@ -189,6 +148,42 @@
         chargerFactures();
         setInterval(chargerFactures, 30000);
     });
+    function getURLParameter(name) {
+            return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
+        }
+
+        // Vérifier s'il y a un message dans l'URL
+        const message = getURLParameter('message');
+        if (message) {
+            const notificationDiv = document.createElement('div');
+            notificationDiv.className = 'notification';
+            notificationDiv.textContent = message;
+            document.body.insertBefore(notificationDiv, document.body.firstChild);
+        }
+
+        function showNotification(message) {
+    const notification = document.getElementById('notification');
+    const notificationMessage = document.getElementById('notification-message');
+    
+    notificationMessage.textContent = message;
+    notification.style.display = 'flex';
+
+    // Cacher la notification après 10 secondes
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 10000);
+}
+
+function closeNotification() {
+    const notification = document.getElementById('notification');
+    notification.style.display = 'none';
+}
+
+window.onload = () => {
+    const message = "Consommation ajoutée avec succès mais à vérifier par le fournisseur";
+    showNotification(message);
+};
+
     </script>
 </body>
 </html>

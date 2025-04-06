@@ -167,6 +167,41 @@ document.getElementById('imagePopup').addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closePopup();
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    fetch('../Traitement/consommation_traitement?action=get_message') 
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                afficherMessage(data.message, "success");
+            }
+            if (data.error) {
+                afficherMessage(data.error, "error");
+            }
+        })
+        .catch(error => console.error("Erreur récupération message:", error));
+});
+
+function afficherMessage(message, type) {
+    const messageDiv = document.createElement("div");
+    messageDiv.textContent = message;
+    messageDiv.style.padding = "10px";
+    messageDiv.style.margin = "10px 0";
+    messageDiv.style.borderRadius = "5px";
+    messageDiv.style.fontWeight = "bold";
+    
+    if (type === "success") {
+        messageDiv.style.backgroundColor = "#d4edda";
+        messageDiv.style.color = "#155724";
+    } else {
+        messageDiv.style.backgroundColor = "#f8d7da";
+        messageDiv.style.color = "#721c24";
+    }
+
+    document.body.prepend(messageDiv); // Ajoute en haut de la page
+}
+
+
 </script>
 
 </body>
