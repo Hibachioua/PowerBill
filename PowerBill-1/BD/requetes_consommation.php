@@ -12,7 +12,7 @@ function getCompteursClient($userId) {
 }
 
 function getLastCounterImage(int $compteurId): array {
-    $baseUrl = '/powerbill/';
+    $baseUrl = '/powerbill/powerbill-1/';
 
     try {
         $pdo = connectDB();
