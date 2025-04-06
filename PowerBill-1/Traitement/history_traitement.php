@@ -1,6 +1,10 @@
 <?php
-// Traitement/history_traitement.php - Contrôleur pour la page d'historique
-require_once "../../BD/historyModel.php";
+// Traitement/history_traitement.php
+require_once "../BD/historyModel.php";
+
+// Pour le débogage
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 /**
  * Prépare les données pour la vue d'historique
@@ -48,24 +52,6 @@ function prepareHistoryData() {
 }
 
 /**
- * Formate la taille du fichier en unités lisibles
- * 
- * @param int $bytes Taille en octets
- * @return string Taille formatée
- */
-function formatFileSize($bytes) {
-    if ($bytes >= 1073741824) {
-        return number_format($bytes / 1073741824, 2) . ' Go';
-    } elseif ($bytes >= 1048576) {
-        return number_format($bytes / 1048576, 2) . ' Mo';
-    } elseif ($bytes >= 1024) {
-        return number_format($bytes / 1024, 2) . ' Ko';
-    } else {
-        return $bytes . ' octets';
-    }
-}
-
-/**
  * Vérifie si un filtre est actif
  * 
  * @param array $filtres Tableau des filtres
@@ -79,4 +65,22 @@ function hasActiveFilters($filtres) {
     }
     return false;
 }
-?>
+
+// Point d'entrée API - renvoie les données au format JSON
+if (isset($_GET['api']) && $_GET['api'] === 'true') {
+    try {
+        header('Content-Type: application/json');
+        header('Access-Control-Allow-Origin: *'); // Pour éviter les problèmes CORS
+        
+        $data = prepareHistoryData();
+        $data['hasFilters'] = hasActiveFilters($data['filtres']);
+        
+        // Assurez-vous que la sortie est propre (pas d'erreurs/warnings PHP)
+        ob_clean();
+        echo json_encode($data);
+    } catch (Exception $e) {
+        header('HTTP/1.1 500 Internal Server Error');
+        echo json_encode(['error' => $e->getMessage()]);
+    }
+    exit;
+}

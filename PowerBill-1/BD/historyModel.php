@@ -1,6 +1,6 @@
 <?php
 require_once "connexion.php";
-
+//historyModel.php
 /**
  * Récupère l'historique des consommations de tous les clients
  * 
