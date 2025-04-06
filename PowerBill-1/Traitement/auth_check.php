@@ -34,14 +34,7 @@ function checkUserAccess($requiredRole = null) {
 }
 
 // Fonction pour obtenir l’URL du dashboard selon le rôle
-function getDashboardUrl($user_role) {
-    switch ($user_role) {
-        case 1: return 'client_dashboard.php';
-        case 2: return 'agent_dashboard.php';
-        case 3: return 'fournisseur_dashboard.php';
-        default: return 'dashboard.php';
-    }
-}
+
 
 // Fonction pour construire les données de la sidebar
 function getSidebarData($current_page, $user_role) {
@@ -83,14 +76,7 @@ function getSidebarData($current_page, $user_role) {
 }
 
 // Fonction utilitaire pour vérifier si la page est un dashboard
-function isDashboardActive($current_page) {
-    return in_array($current_page, [
-        'dashboard.php',
-        'client_dashboard.php',
-        'agent_dashboard.php',
-        'fournisseur_dashboard.php'
-    ]);
-}
+
 
 // Fonction pour redirection selon le rôle
 

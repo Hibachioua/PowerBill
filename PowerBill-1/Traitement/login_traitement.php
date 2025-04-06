@@ -11,7 +11,7 @@ function getRedirectPath($roleId) {
         case 2: // Agent
             return '../IHM/agent_dashboard.php';
         case 3: // Fournisseur
-            return '../IHM/fournisseur_dashboard.php';
+            return '../IHM/fournisseur/fournisseur_dashboard.php';
         default:
             return '../IHM/dashboard.php'; // Page par défaut
     }
