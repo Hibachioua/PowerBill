@@ -1,10 +1,4 @@
-<?php
-// Ce fichier est inclus depuis des pages qui ont déjà démarré une session
-// Pas besoin de session_start() ici
 
-// Pas de redirection ici, c'est géré par auth_check.php qui est inclus avant
-?>
-<!-- Header Client-->
 <header>
     <nav class="navbar navbar-expand-lg bg-white">
         <div class="container">
@@ -23,7 +17,7 @@
                         <a class="nav-link" href="client_dashboard.php">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="enter_bill.php">Enter Bill</a>
+                        <a class="nav-link" href="saisie_consommation.php">Enter Bill</a>
                     </li>
                     
                     <li class="nav-item">
