@@ -4,10 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consommation - PowerBill</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/styles.css?v=1.0">
+    <style>
+</style>
 </head>
 <body>
-
+<div id="notification" class="notification" style="display:none;">
+    <span id="notification-message"></span>
+    <button id="notification-close" onclick="closeNotification()">×</button>
+</div>
 <div class="consumption-container">
     <h2>Enregistrez votre consommation du mois</h2>
 
@@ -199,6 +204,34 @@ function afficherMessage(message, type) {
     }
 
     document.body.prepend(messageDiv); // Ajoute en haut de la page
+}
+
+function getURLParameter(name) {
+    return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
+}
+
+function showNotification(message) {
+    const notification = document.getElementById('notification');
+    const notificationMessage = document.getElementById('notification-message');
+    
+    notificationMessage.textContent = message;
+    notification.style.display = 'flex';
+
+    // Cacher la notification après 10 secondes
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 10000);
+}
+
+function closeNotification() {
+    const notification = document.getElementById('notification');
+    notification.style.display = 'none';
+}
+
+// Vérifier s'il y a un message d'erreur dans l'URL
+const errorMessage = getURLParameter('error');
+if (errorMessage) {
+    showNotification(errorMessage);
 }
 
 

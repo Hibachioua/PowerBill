@@ -12,75 +12,89 @@ function getCompteursClient($userId) {
 }
 
 function getLastCounterImage(int $compteurId): array {
-    $baseUrl = '/powerbill/'; 
+
+    $baseUrl = '/powerbill/'; // À adapter à votre configuration
+
+
+
     try {
+
         $pdo = connectDB();
+
         if (!$pdo) {
+
             throw new Exception("Connexion DB échouée");
+
         }
+
+
 
         $stmt = $pdo->prepare("
+
             SELECT Image_Compteur, 
-                   CONCAT(Annee, '-', LPAD(Mois, 2, '0'), '-01') as date_prise
+
+                   CONCAT(Annee, '-', LPAD(Mois, 2, '0')) as date_prise
+
             FROM consommation 
+
             WHERE ID_Compteur = ?
-            ORDER BY Annee DESC, Mois DESC 
+
+            ORDER BY ID_Consommation DESC 
+
             LIMIT 1
+
         ");
+
         $stmt->execute([$compteurId]);
+
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
+
+
         if (empty($result['Image_Compteur'])) {
-            return [
-                'success' => false,
-                'error' => "Aucune image précédente disponible"
-            ];
+
+            throw new Exception("Aucune image trouvée en base");
+
         }
+
+
 
         $imagePath = __DIR__ . '/../' . $result['Image_Compteur'];
+
         if (!file_exists($imagePath)) {
-            return [
-                'success' => false,
-                'error' => "L'image n'est plus disponible sur le serveur"
-            ];
+
+            throw new Exception("Fichier introuvable: " . $imagePath);
+
         }
 
+
+
         return [
+
             'success' => true,
+
             'image_url' => $baseUrl . $result['Image_Compteur'],
-            'date' => date('d/m/Y', strtotime($result['date_prise']))
+
+            'date' => $result['date_prise']
+
         ];
+
+
 
     } catch (Exception $e) {
+
         error_log("Erreur getLastCounterImage: " . $e->getMessage());
+
         return [
+
             'success' => false,
-            'error' => "Erreur lors de la récupération de l'image"
+
+            'error' => $e->getMessage()
+
         ];
+
     }
 }
-
-function getDerniereConsommation($compteurId) {
-    $pdo = connectDB();
-    if (!$pdo) {
-        return false;
-    }
-
-    try {
-        $query = "SELECT Qté_consommé as quantite FROM consommation 
-                  WHERE ID_Compteur = ? 
-                  ORDER BY Annee DESC, Mois DESC 
-                  LIMIT 1";
-        $stmt = $pdo->prepare($query);
-        $stmt->execute([$compteurId]);
-        
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        error_log("Erreur DB: " . $e->getMessage());
-        return false;
-    }
-}
-
 function insererConsommation(
 
     int $ID_Compteur,

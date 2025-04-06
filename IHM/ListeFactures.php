@@ -11,23 +11,6 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/styleListeFacture.css?v=1.0">
     <link rel="stylesheet" href="assets/css/filter-styles.css">
-    <style>
-.notification {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px;
-    margin: 0;
-    border-radius: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 1000;
-}
-    </style>
 </head>
 <body>
 <div id="notification" class="notification" style="display:none;">
@@ -148,20 +131,7 @@
         chargerFactures();
         setInterval(chargerFactures, 30000);
     });
-    function getURLParameter(name) {
-            return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
-        }
-
-        // Vérifier s'il y a un message dans l'URL
-        const message = getURLParameter('message');
-        if (message) {
-            const notificationDiv = document.createElement('div');
-            notificationDiv.className = 'notification';
-            notificationDiv.textContent = message;
-            document.body.insertBefore(notificationDiv, document.body.firstChild);
-        }
-
-        function showNotification(message) {
+    function showNotification(message) {
     const notification = document.getElementById('notification');
     const notificationMessage = document.getElementById('notification-message');
     
@@ -179,10 +149,14 @@ function closeNotification() {
     notification.style.display = 'none';
 }
 
-window.onload = () => {
-    const message = "Consommation ajoutée avec succès mais à vérifier par le fournisseur";
-    showNotification(message);
-};
+// Vérifier si un message est passé dans l'URL
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
+    if (message) {
+        showNotification(decodeURIComponent(message));
+    }
+});
 
     </script>
 </body>

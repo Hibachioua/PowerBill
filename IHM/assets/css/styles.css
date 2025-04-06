@@ -8,6 +8,7 @@ body {
     line-height: 1.6;
 }
 
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -90,7 +91,6 @@ header {
     width: 100%;
 }
 
-/* 🏠 Hero Section */
 .hero {
     background: linear-gradient(rgba(52, 152, 219, 0.8), rgba(41, 128, 185, 0.9)), url('../assets/images/Hero3.png');
     background-size: cover;
@@ -884,7 +884,6 @@ footer {
     background: #3a5a8a;
 }
 
-/* Pour les petits écrans */
 @media (max-width: 768px) {
     #lastCounterImage {
         max-width: 95%;
@@ -895,4 +894,34 @@ footer {
         padding: 10px;
         max-height: 60vh;
     }
+}
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    background-color: red;
+    color: white;
+    padding: 10px;
+    margin: 0;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#notification-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: transform 0.2s ease-in-out;
+}
+
+#notification-close:hover {
+    transform: scale(1.2);
 }
