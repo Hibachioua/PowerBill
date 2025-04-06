@@ -50,6 +50,6 @@
 </div>
 
 <script src="../assets/js/saisie_consommation.js"></script>
-
+<?php include('../Mise_en_page/footer.php'); ?>
 </body>
 </html>

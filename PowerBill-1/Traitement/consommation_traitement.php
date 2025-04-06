@@ -60,10 +60,10 @@ try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             // Vérification de la date
-            $today = date('j'); // Jour du mois (1-31)
-            if ($today != 18) {
-                throw new Exception("L'insertion n'est autorisée que le 18 de chaque mois.");
-            }
+            // $today = date('j'); // Jour du mois (1-31)
+            // if ($today != 18) {
+            //     throw new Exception("L'insertion n'est autorisée que le 18 de chaque mois.");
+            // }
 
             $ID_Compteur = filter_input(INPUT_POST, 'ID_Compteur', FILTER_VALIDATE_INT);
             $Mois = date('n');
