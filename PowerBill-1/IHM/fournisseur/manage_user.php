@@ -1,29 +1,7 @@
 <?php
-// IHM/manage_user.php - Vue pour la gestion des utilisateurs
-require_once "../Traitement/auth_check.php";
-require_once "../Traitement/user_traitement.php";
-
-
-$current_page = basename($_SERVER['PHP_SELF']); // ex : "client_dashboard.php"
-$user_role = $_SESSION['user_role'];            // récupéré après login
-
-$sidebar_data = getSidebarData($current_page, $user_role); // 💡 essentiel ici
-
-
-
-
-
-// Vérifier que l'utilisateur a le rôle fournisseur
-checkUserAccess(3);
-
-// Traiter les actions (ajout, modification, suppression)
-$actionResult = processUserAction();
-$message = $actionResult['message'];
-$messageType = $actionResult['messageType'];
-
-// Préparer les données pour la vue
-$viewData = prepareUserData();
-$users = $viewData['users'];
+require_once "../../Traitement/auth_check.php";
+require_once "../../Traitement/user_traitement.php";
+require_once "../../Traitement/sidebar_controller.php";
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -33,13 +11,13 @@ $users = $viewData['users'];
     <title>PowerBill - Gestion des Utilisateurs</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/manage_user.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/manage_user.css">
 
     
 </head>
 <body>
-    <?php include "sidebar.php"; ?>
+<?php include __DIR__ . "/../Mise_en_page/sidebar.php"; ?>
     
     <div class="main-content">
         <div class="content-header">
@@ -67,6 +45,7 @@ $users = $viewData['users'];
                             <th>ID</th>
                             <th>Nom</th>
                             <th>Prénom</th>
+                            <th>CIN</th>
                             <th>Email</th>
                             <th>Adresse</th>
                             <th>Actions</th>
@@ -78,6 +57,7 @@ $users = $viewData['users'];
                                 <td><?php echo $user['ID_Utilisateur']; ?></td>
                                 <td><?php echo htmlspecialchars($user['Nom']); ?></td>
                                 <td><?php echo htmlspecialchars($user['Prenom']); ?></td>
+                                <td><?php echo htmlspecialchars($user['CIN']); ?></td>
                                 <td><?php echo htmlspecialchars($user['Email']); ?></td>
                                 <td><?php echo htmlspecialchars($user['Adresse']); ?></td>
                                 <td class="actions">
@@ -85,6 +65,7 @@ $users = $viewData['users'];
                                             data-id="<?php echo $user['ID_Utilisateur']; ?>"
                                             data-nom="<?php echo htmlspecialchars($user['Nom']); ?>"
                                             data-prenom="<?php echo htmlspecialchars($user['Prenom']); ?>"
+                                            data-cin="<?php echo htmlspecialchars($user['CIN']); ?>"
                                             data-email="<?php echo htmlspecialchars($user['Email']); ?>"
                                             data-adresse="<?php echo htmlspecialchars($user['Adresse']); ?>">
                                         <i class="fas fa-edit"></i>
@@ -133,6 +114,11 @@ $users = $viewData['users'];
                         <div class="mb-3">
                             <label for="prenom" class="form-label">Prénom</label>
                             <input type="text" class="form-control" id="prenom" name="prenom" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cin" class="form-label">CIN</label>
+                            <input type="text" class="form-control" id="cin" name="cin" required>
                         </div>
                         
                         <div class="mb-3">
@@ -183,6 +169,11 @@ $users = $viewData['users'];
                         <div class="mb-3">
                             <label for="edit_prenom" class="form-label">Prénom</label>
                             <input type="text" class="form-control" id="edit_prenom" name="prenom" required>
+                        </div>
+
+                        <div class="mb-3">
+                           <label for="edit_cin" class="form-label">CIN</label>
+                           <input type="text" class="form-control" id="edit_cin" name="cin" required>
                         </div>
                         
                         <div class="mb-3">
@@ -240,7 +231,7 @@ $users = $viewData['users'];
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-    <script src="assets/js/manage_user.js"></script>
+    <script src="../assets/js/manage_user.js"></script>
 
 </body>
 </html>
