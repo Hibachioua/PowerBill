@@ -17,16 +17,21 @@ switch ($_GET['action']) {
         $factures = getNonPayes($pdo); 
         header('Content-Type: application/json');
         echo json_encode($factures);
+        error_log("Test d'enregistrement dans error.logs");
+
+        error_log("Factures récupérées: " . json_encode($factures));
+
+
         break;
         
     case 'payerFacture':
-        if (empty($_GET['factureID'])) {
-            echo json_encode(['status' => 'error', 'message' => 'ID facture manquant']);
+        if (empty($_GET['factureID']) || empty($_GET['type'])) {
+            echo json_encode(['status' => 'error', 'message' => 'ID ou type de facture manquant']);
             exit;
         }
-        
+    
         try {
-            $success = payerFacture($pdo, $_GET['factureID']);
+            $success = payerFacture($pdo, $_GET['factureID'], $_GET['type']);
             echo json_encode([
                 'status' => $success ? 'success' : 'error',
                 'message' => $success ? 'Paiement effectué' : 'Échec du paiement'

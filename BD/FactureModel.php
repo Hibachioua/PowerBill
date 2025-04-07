@@ -1,10 +1,11 @@
-<?php
+<?php 
 require_once __DIR__ . '/connexion.php';
 
 function getNonPayes($pdo) {
     $sql = "
     SELECT 
         f.ID_Facture,
+        'principale' AS type,
         f.ID_Compteur,
         f.ID_Consommation,
         f.Date_émission,
@@ -22,7 +23,30 @@ function getNonPayes($pdo) {
     JOIN compteur cp ON f.ID_Compteur = cp.ID_Compteur
     JOIN client cl ON cp.ID_Client = cl.ID_Client
     WHERE f.Statut_paiement = 'non paye'
-    ORDER BY f.Date_émission DESC;
+
+    UNION ALL
+
+    SELECT 
+        fc.ID_Facture_Complementaire AS ID_Facture,
+        'complementaire' AS type,
+        fc.ID_Compteur,
+        NULL AS ID_Consommation,
+        fc.Date_emission AS Date_émission,
+        NULL AS Mois,
+        fcs.Annee,
+        fc.Prix_HT,
+        fc.Prix_TTC,
+        fc.Statut_paiement,
+        cp2.ID_Client,
+        cl2.Nom,
+        cl2.Prenom,
+        fc.Consommation AS Qté_consommé
+    FROM facture_complementaire fc
+    JOIN compteur cp2 ON fc.ID_Compteur = cp2.ID_Compteur
+    JOIN client cl2 ON cp2.ID_Client = cl2.ID_Client
+    JOIN fichier_consommation fcs ON fc.ID_Compteur = fcs.ID_Compteur
+    WHERE fc.Statut_paiement = 'non payee'
+    ORDER BY Date_émission DESC;
     ";
 
     try {
@@ -36,23 +60,15 @@ function getNonPayes($pdo) {
     }
 }
 
-function payerFacture($pdo, $factureID) {
-    $sql = "UPDATE facture SET Statut_paiement = 'paye'
-            WHERE ID_Facture = :id";
-    $stmt = $pdo->prepare($sql);
-    return $stmt->execute([':id' => $factureID]);
-}
+function payerFacture($pdo, $factureID, $type) {
+    if ($type === 'principale') {
+        $update = $pdo->prepare("UPDATE facture SET Statut_paiement = 'paye' WHERE ID_Facture = :id");
+    } elseif ($type === 'complementaire') {
+        $update = $pdo->prepare("UPDATE facture_complementaire SET Statut_paiement = 'payee' WHERE ID_Facture_Complementaire = :id");
+    } else {
+        return false; // type inconnu
+    }
 
-function getDetailsFacture($pdo, $factureID) {
-    $sql = "SELECT f.*, c.ID_Compteur, cl.Nom, cl.Prenom, u.Email, fc.* 
-            FROM facture f
-            JOIN compteur c ON f.ID_Compteur = c.ID_Compteur
-            JOIN client cl ON c.ID_Client = cl.ID_Client
-            JOIN utilisateur u ON cl.ID_Utilisateur = u.ID_Utilisateur
-            JOIN consommation fc ON f.ID_Consommation = fc.ID_Consommation
-            WHERE f.ID_Facture = :id";
-    
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([':id' => $factureID]);
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+    return $update->execute([':id' => $factureID]);
 }
+?>

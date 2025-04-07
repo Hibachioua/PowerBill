@@ -129,47 +129,71 @@
         }
 
         function afficherFactures(factures) {
-            const tbody = $('#facture-table-body').empty();
-            
-            if (factures.length === 0) {
-                tbody.append('<tr><td colspan="8">Aucune facture trouvée</td></tr>');
-                return;
-            }
+    const tbody = $('#facture-table-body').empty();
+    
+    if (factures.length === 0) {
+        tbody.append('<tr><td colspan="8">Aucune facture trouvée</td></tr>');
+        return;
+    }
 
-            factures.forEach(facture => {
-                // Affichage des données dans le tableau
-                const row = `
-                <tr>
-                    <td>${facture.Mois}/${facture.Annee}</td>
-                    <td>${facture.ID_Compteur}</td>
-                    <td>${facture.Nom || 'Nom non disponible'} ${facture.Prenom || 'Prénom non disponible'}</td>
-                    <td>${facture.Date_émission}</td>
-                    <td>${facture.Qté_consommé || 'Consommation non disponible'} kWh</td>
-                    <td>${facture.Prix_TTC} DH</td>
-                    <td>
-                        <span class="badge ${facture.Statut_paiement === 'paye' ? 'bg-success' : 'bg-warning'}">
-                            ${facture.Statut_paiement}
-                        </span>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-secondary download-btn" data-id="${facture.ID_Facture}">
-                            <i class="fas fa-download"></i> PDF
-                        </button>
-                    </td>
-                </tr>`;
-                tbody.append(row);
-            });
+    factures.forEach(facture => {
+        // Vérification du type de facture et ajustement de l'affichage de la période
+        let periode = '';
+        if (facture.type === 'complementaire') {
+            // Afficher uniquement l'année pour les factures complémentaires
+            periode = facture.Annee;
+        } else {
+            // Afficher le mois et l'année pour les autres types
+            periode = `${facture.Mois}/${facture.Annee}`;
         }
 
+        // Affichage des données dans le tableau
+        const row = `
+        <tr>
+            <td>${periode}</td>
+            <td>${facture.ID_Compteur}</td>
+            <td>${facture.Nom || 'Nom non disponible'} ${facture.Prenom || 'Prénom non disponible'}</td>
+            <td>${facture.Date_émission}</td>
+            <td>${facture.Qté_consommé || 'Consommation non disponible'} kWh</td>
+            <td>${facture.Prix_TTC} DH</td>
+            <td>
+                <span class="badge ${facture.Statut_paiement === 'paye' ? 'bg-success' : 'bg-warning'}">
+                    ${facture.Statut_paiement}
+                </span>
+            </td>
+            <td>
+                <button class="btn btn-sm btn-secondary download-btn" data-id="${facture.ID_Facture}">
+                    <i class="fas fa-download"></i> PDF
+                </button>
+            </td>
+        </tr>`;
+        tbody.append(row);
+    });
+}
+
         // Fonction pour télécharger la facture au format PDF
-        $(document).on('click', '.download-btn', function() {
-            const factureID = $(this).data('id');
-            if (!factureID || isNaN(factureID)) {
-                alert("Facture invalide !");
-                return;
-            }
+$(document).on('click', '.download-btn', function() {
+    const factureID = $(this).data('id');
+    if (!factureID || isNaN(factureID)) {
+        alert("Facture invalide !");
+        return;
+    }
+
+    // Trouver la facture correspondante
+    const facture = allFactures.find(f => f.ID_Facture === factureID);
+    
+    // Vérifier le type de la facture et rediriger en conséquence
+    if (facture) {
+        if (facture.type === 'complementaire') {
+            window.location.href = `../Traitement/telecharger_facture_complementaire.php?factureID=${factureID}`;
+        } else {
             window.location.href = `../Traitement/telecharger_facture.php?factureID=${factureID}`;
-        });
+        }
+    } else {
+        alert("Facture non trouvée !");
+    }
+});
+
 
         // Redirection pour consulter les anciennes factures
         $('#consulterAnciennesFactures').click(function() {

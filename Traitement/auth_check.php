@@ -153,7 +153,14 @@ function getSidebarData($current_page, $user_role) {
             'label' => 'Manage complaints',
             'url' => 'manage_complaints.php',
             'active' => ($current_page == 'manage_complaints.php')
-        ]
+        ],
+
+        'annual_consumption' => [
+            'icon' => 'fas fa-chart-line', 
+            'label' => 'Consommations annuelles',
+            'url' => 'consommation_annuelle.php', 
+            'active' => ($current_page == 'consommation_annuelle.php')
+],
     ];
     
     return [

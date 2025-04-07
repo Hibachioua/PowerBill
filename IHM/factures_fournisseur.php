@@ -82,6 +82,7 @@ checkUserAccess(3);
                 <table>
                     <thead>
                         <tr>
+                            <th>Type</th>
                             <th>Période</th>
                             <th>Compteur</th>
                             <th>Client</th>

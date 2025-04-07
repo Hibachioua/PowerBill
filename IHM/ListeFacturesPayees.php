@@ -100,6 +100,6 @@
     <?php include('footer.php'); ?>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="assets/js/listeFacture.js"></script>
+    <script src="assets/js/listeFacturepayees.js"></script>
 </body>
 </html>
