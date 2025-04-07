@@ -1,3 +1,5 @@
+<?php
+require_once "connexion.php";
 function getConsommations($pdo) {
     $sql = "SELECT 
     cons.Annee,
@@ -103,3 +105,4 @@ function genererFacture($pdo) {
         return ['success' => false, 'error' => 'Aucune donnée trouvée pour la facture'];
     }
 }
+?>
