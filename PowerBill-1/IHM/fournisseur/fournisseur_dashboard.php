@@ -1,24 +1,10 @@
-
-
-
 <?php
-// Version autonome et simplifiée du tableau de bord
-// Nécessite seulement le fichier auth_check.php et sidebar.php
-
 require_once "../../Traitement/auth_check.php";
 require_once "../../Traitement/dashboard_traitement.php";
-// Valeurs hardcodées pour les statistiques
-$stats = [
-    'total_clients' => 3,
-    'total_complaints' => 6,
-    'anomaly_consumptions' => 4,
-    'monthly_revenue' => 1755
-];
 
-// Gérer les données du sidebar
-$current_page = basename($_SERVER['PHP_SELF']);
-$user_role = $_SESSION['user_role'];
-$sidebar_data = getSidebarData($current_page, $user_role);
+$viewData = loadDashboardView();
+extract($viewData);
+
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -26,16 +12,16 @@ $sidebar_data = getSidebarData($current_page, $user_role);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PowerBill - Tableau de bord Fournisseur</title>
-    
-    <!-- Bootstrap et FontAwesome (assurez-vous qu'ils sont bien chargés) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <!-- Chart.js - Assurez-vous que cette version est bien chargée -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/four_dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    
-    <!-- Style interne pour éviter les conflits CSS -->
-    <style>
+</head>
+<body>
+
+<style>
         .main-content {
             margin-left: 250px;
             width: calc(100% - 250px);
@@ -171,9 +157,9 @@ $sidebar_data = getSidebarData($current_page, $user_role);
                 width: 100%;
             }
         }
-    </style>
-</head>
-<body>
+    </style> 
+
+
 <?php include __DIR__ . "/../Mise_en_page/sidebar.php"; ?>
     
     <div class="main-content">
@@ -185,8 +171,8 @@ $sidebar_data = getSidebarData($current_page, $user_role);
             <div class="user-menu">
                 <i class="fas fa-bell icon"></i>
                 <i class="fas fa-cog icon"></i>
-                <div class="user-avatar">
-                    <img src="assets/images/user.jpg" alt="User">
+                <div class="user-avatar" style="cursor: pointer;">
+                    <img src="../assets/images/user.svg" alt="User">
                 </div>
             </div>
         </div>
@@ -280,144 +266,42 @@ $sidebar_data = getSidebarData($current_page, $user_role);
                     </div>
                 </div>
             </div>
-            
-           
         </div>
     </div>
     
-    <script>
-        // Code d'initialisation des graphiques
-        window.onload = function() {
-            console.log("Fenêtre chargée, démarrage de l'initialisation des graphiques");
-            
-            // Utiliser un timeout pour éviter les problèmes de timing
-            setTimeout(function() {
-                // Vérifier que Chart.js est disponible
-                if (typeof Chart === 'undefined') {
-                    console.error("Chart.js n'est pas chargé");
-                    alert("Erreur: Chart.js n'est pas disponible. Veuillez vérifier la console.");
-                    return;
-                }
-                
-                console.log("Chart.js est disponible:", Chart.version);
-                
-                // Données communes
-                const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-                
-                try {
-                    // Graphique 1: Consommation Mensuelle
-                    const ctx1 = document.getElementById('chart1');
-                    if (!ctx1) {
-                        console.error("Canvas 'chart1' non trouvé");
-                    } else {
-                        new Chart(ctx1, {
-                            type: 'line',
-                            data: {
-                                labels: months,
-                                datasets: [{
-                                    label: 'Consommation (kWh)',
-                                    data: [140, 160, 170, 1810, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    fill: false,
-                                    borderColor: 'rgb(75, 192, 192)',
-                                    tension: 0.1
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false
-                            }
-                        });
-                        console.log("Graphique 1 initialisé");
-                    }
+    <!-- Modal Profil Utilisateur -->
+    <div class="modal fade" id="userProfileModal" tabindex="-1" aria-labelledby="userProfileModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userProfileModalLabel">Profil Fournisseur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <img src="../assets/images/user.svg" alt="Photo de profil" class="rounded-circle" width="100" height="100">
+                        <h4 class="mt-2" id="userCompanyName">Chargement...</h4>
+                        <p class="text-muted" id="userEmail">Chargement...</p>
+                    </div>
                     
-                    // Graphique 2: Nouveaux Clients
-                    const ctx2 = document.getElementById('chart2');
-                    if (!ctx2) {
-                        console.error("Canvas 'chart2' non trouvé");
-                    } else {
-                        new Chart(ctx2, {
-                            type: 'bar',
-                            data: {
-                                labels: months,
-                                datasets: [{
-                                    label: 'Nouveaux Clients',
-                                    data: [2, 1, 3, 5, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    backgroundColor: 'rgba(54, 162, 235, 0.5)'
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    y: {
-                                        beginAtZero: true
-                                    }
-                                }
-                            }
-                        });
-                        console.log("Graphique 2 initialisé");
-                    }
-                    
-                    // Graphique 3: Statuts
-                    const ctx3 = document.getElementById('chart3');
-                    if (!ctx3) {
-                        console.error("Canvas 'chart3' non trouvé");
-                    } else {
-                        new Chart(ctx3, {
-                            type: 'doughnut',
-                            data: {
-                                labels: ['Normal', 'Anomalie'],
-                                datasets: [{
-                                    data: [8, 4],
-                                    backgroundColor: [
-                                        'rgb(75, 192, 192)',
-                                        'rgb(255, 99, 132)'
-                                    ]
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false
-                            }
-                        });
-                        console.log("Graphique 3 initialisé");
-                    }
-                    
-                    // Graphique 4: Consommation par Compteur
-                    const ctx4 = document.getElementById('chart4');
-                    if (!ctx4) {
-                        console.error("Canvas 'chart4' non trouvé");
-                    } else {
-                        new Chart(ctx4, {
-                            type: 'bar',
-                            data: {
-                                labels: ['Compteur 1', 'Compteur 2'],
-                                datasets: [{
-                                    label: 'Consommation (kWh)',
-                                    data: [1950, 170],
-                                    backgroundColor: 'rgba(255, 159, 64, 0.5)'
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    y: {
-                                        beginAtZero: true
-                                    }
-                                }
-                            }
-                        });
-                        console.log("Graphique 4 initialisé");
-                    }
-                    
-                    console.log("Tous les graphiques ont été initialisés avec succès");
-                } catch (error) {
-                    console.error("Erreur lors de l'initialisation des graphiques:", error);
-                    alert("Erreur lors de l'initialisation des graphiques. Vérifiez la console pour plus de détails.");
-                }
-            }, 500); // Délai de 500ms
-        };
-    </script>
+                    <div class="user-info">
+                        <div class="mb-3">
+                            <label class="fw-bold">ID Fournisseur:</label>
+                            <p id="userFournisseurId">Chargement...</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold">ID Utilisateur:</label>
+                            <p id="userId">Chargement...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/dashboard_charts.js"></script>
 </body>
 </html>

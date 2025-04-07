@@ -20,9 +20,7 @@
                 <div class="breadcrumb">PowerBill / Historique</div>
                 <h2>Historique des Consommations</h2>
             </div>
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Rechercher..." onkeyup="filterTable()">
-            </div>
+            
         </div>
         
         <!-- Filtres -->
@@ -36,7 +34,6 @@
                     <label for="annee" class="form-label">Année</label>
                     <select name="annee" id="annee" class="form-select">
                         <option value="">Toutes les années</option>
-                        <!-- Options générées par JavaScript -->
                     </select>
                 </div>
                 
@@ -44,7 +41,6 @@
                     <label for="mois" class="form-label">Mois</label>
                     <select name="mois" id="mois" class="form-select">
                         <option value="">Tous les mois</option>
-                        <!-- Options générées par JavaScript -->
                     </select>
                 </div>
                 
@@ -52,7 +48,6 @@
                     <label for="client" class="form-label">Client</label>
                     <select name="client" id="client" class="form-select">
                         <option value="">Tous les clients</option>
-                        <!-- Options générées par JavaScript -->
                     </select>
                 </div>
                 
@@ -66,16 +61,13 @@
                 </div>
             </form>
             
-            <!-- Badges des filtres actifs -->
             <div id="filterBadges" class="filter-badges mt-3">
-                <!-- Badges générés par JavaScript -->
             </div>
         </div>
         
         <!-- Tableau des consommations -->
         <div class="content-container">
             <div id="alert-container">
-                <!-- Alerte générée par JavaScript si nécessaire -->
             </div>
             
             <div class="table-responsive">
@@ -94,7 +86,6 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        <!-- Lignes générées par JavaScript -->
                     </tbody>
                 </table>
             </div>
@@ -103,7 +94,6 @@
             <div class="pagination-container">
                 <nav aria-label="Page navigation">
                     <ul class="pagination pagination-sm" id="pagination">
-                        <!-- Pagination générée par JavaScript -->
                     </ul>
                 </nav>
             </div>

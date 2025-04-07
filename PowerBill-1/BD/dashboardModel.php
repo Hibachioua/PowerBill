@@ -286,4 +286,37 @@ function getDashboardData() {
         'consumption_by_meter' => getConsumptionByMeter()
     ];
 }
+
+
+function getFournisseurDetails($userId) {
+    $connexion = connectDB();
+    $userData = null;
+    
+    if ($connexion) {
+        try {
+            $stmt = $connexion->prepare("
+                SELECT 
+                    u.ID_Utilisateur, 
+                    u.Email, 
+                    f.Nom, 
+                    f.Prenom, 
+                    f.Telephone,
+                    f.Adresse
+                FROM utilisateur u
+                LEFT JOIN fournisseur f ON u.ID_Utilisateur = f.ID_Utilisateur
+                WHERE u.ID_Utilisateur = :userId AND u.ID_Role = 3
+            ");
+            $stmt->bindParam(':userId', $userId);
+            $stmt->execute();
+            
+            if ($stmt->rowCount() > 0) {
+                $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération des détails du fournisseur: " . $e->getMessage());
+        }
+    }
+    
+    return $userData;
+}
 ?>
