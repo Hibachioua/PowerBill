@@ -7,6 +7,7 @@
     <title>Saisis ta consommation</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/saisie_consommation.css">
     </head>
 <?php include __DIR__ . "/../Mise_en_page/header_client.php"; ?>
 <body>
