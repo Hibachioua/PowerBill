@@ -1,5 +1,5 @@
 <?php
-
+// Traitement/logout.php - Contrôleur pour la déconnexion
 require_once __DIR__ . "/../BD/logoutModel.php";
 
 /**

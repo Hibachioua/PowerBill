@@ -75,9 +75,6 @@ function getSidebarData($current_page, $user_role) {
     ];
 }
 
-// Fonction utilitaire pour vérifier si la page est un dashboard
 
-
-// Fonction pour redirection selon le rôle
 
 ?>
