@@ -77,7 +77,7 @@ if (isset($_POST['submit'])) {
                 $consommation = $data[2];
                 $annee = $data[4];
 
-                if (insertConsommation($pdo, $compteurtId, $consommation, $annee, $AgentId, $fileName)) {
+                if (insertConsommation($pdo, $compteurId, $consommation, $annee, $AgentId, $fileName)) {
                     // Message de succès pour chaque insertion
                     continue;
                 } else {

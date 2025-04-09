@@ -14,7 +14,7 @@
 
         <div id="message" class="message" style="display: none;"></div>
 
-        <form action="../Traitement/traitement_consommation_annuelle.php" method="POST" enctype="multipart/form-data">
+        <form action="../../Traitement/traitement_consommation_annuelle.php" method="POST" enctype="multipart/form-data">
             <div class="upload-section">
                 <div class="file-input">
                     <input type="file" name="file" id="file" accept=".txt" required>

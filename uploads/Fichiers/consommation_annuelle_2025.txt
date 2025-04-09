@@ -1,0 +1,2 @@
+Compteur ID: 1 | Consommation: 1500 kWh | Année: 2025
+Compteur ID: 2 | Consommation: 1800 kWh | Année: 2025

@@ -1,4 +1,0 @@
-Compteur ID: 1 | Consommation: 1500 kWh | Année: 2024
-Compteur ID: 2 | Consommation: 1800 kWh | Année: 2024
-Compteur ID: 3 | Consommation: 1200 kWh | Année: 2024
-Compteur ID: 4 | Consommation: 1400 kWh | Année: 2024
