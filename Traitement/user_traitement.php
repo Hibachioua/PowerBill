@@ -1,5 +1,21 @@
 <?php
-require_once "../BD/user_model.php";
+require_once "../../BD/user_model.php";
+require_once "sidebar_controller.php";
+
+
+checkUserAccess(3);
+
+$actionResult = processUserAction();
+$message = $actionResult['message'];
+$messageType = $actionResult['messageType'];
+
+$viewData = prepareUserData();
+$users = $viewData['users'];
+
+// Si ce fichier est appelé directement, rediriger vers la vue
+if (basename($_SERVER['SCRIPT_FILENAME']) == basename(__FILE__)) {
+    include "../IHM/fournisseur/manage_user.php";
+}
 
 
 function processUserAction() {
@@ -11,15 +27,15 @@ function processUserAction() {
         
         switch ($action) {
             case 'add':
-                // Récupérer et valider les données
                 $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
                 $password = $_POST['password'];
                 $nom = htmlspecialchars($_POST['nom']);
                 $prenom = htmlspecialchars($_POST['prenom']);
                 $adresse = htmlspecialchars($_POST['adresse']);
-                
+                $cin = htmlspecialchars($_POST['cin']); 
+
                 // Appeler la fonction du modèle
-                $result = addUser($nom, $prenom, $email, $password, $adresse);
+                $result = addUser($nom, $prenom, $email, $password, $adresse, $cin);
                 
                 // Stocker le message dans la session
                 $_SESSION['flash_message'] = $result['message'];
@@ -39,9 +55,10 @@ function processUserAction() {
                     $nom = htmlspecialchars($_POST['nom']);
                     $prenom = htmlspecialchars($_POST['prenom']);
                     $adresse = htmlspecialchars($_POST['adresse']);
-                    
+                    $cin = htmlspecialchars($_POST['cin']); 
+
                     // Appeler la fonction du modèle
-                    $result = updateUser($userId, $nom, $prenom, $email, $password, $adresse);
+                    $result = updateUser($userId, $nom, $prenom, $email, $password, $adresse, $cin);
                     
                     // Stocker le message dans la session
                     $_SESSION['flash_message'] = $result['message'];
@@ -95,9 +112,9 @@ function processUserAction() {
     ];
 }
 
-/**
- * Prépare les données pour la vue
- */
+
+ // Prépare les données pour la vue
+ 
 function prepareUserData() {
     // Récupérer les utilisateurs et les rôles
     $users = getAllUsers();

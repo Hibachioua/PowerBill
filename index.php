@@ -1,4 +1,3 @@
 <?php
-header("Location: IHM/index.php");
-exit;
+header('Location:IHM/index.php');
 ?>

@@ -1,38 +1,47 @@
 <?php
-require_once "../BD/connexion.php";
+// Traitement/logout.php - Contrôleur pour la déconnexion
+require_once __DIR__ . "/../BD/logoutModel.php";
 
-$connexion = connectDB();
-
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Supprimer le token de la base de données
-if (isset($_SESSION['user_id']) && $connexion) {
-    try {
-        $stmt = $connexion->prepare("
-            UPDATE utilisateur 
-            SET remember_token = NULL, 
-                token_expiry = NULL 
-            WHERE ID_Utilisateur = :id
-        ");
-        $stmt->bindParam(':id', $_SESSION['user_id']);
-        $stmt->execute();
-    } catch (PDOException $e) {
-        error_log("Erreur déconnexion: " . $e->getMessage());
+/**
+ * Gère le processus de déconnexion complet
+ * En suivant le pattern MVC strictement, ce contrôleur coordonne le processus
+ * mais délègue toutes les opérations de données au modèle
+ */
+function processLogout() {
+    // 1. Démarrer la session si elle n'est pas active
+    if (!isSessionActive()) {
+        session_start();
     }
+    
+    // 2. Supprimer le token de mémorisation en base de données si l'utilisateur est connecté
+    $userId = getCurrentUserId();
+    if ($userId) {
+        removeRememberToken($userId);
+    }
+    
+    // 3. Supprimer le cookie de mémorisation
+    removeRememberCookie();
+    
+    // 4. Vider les données de session
+    $_SESSION = array();
+    
+    // 5. Supprimer le cookie de session
+    removeSessionCookie();
+    
+    // 6. Détruire la session
+    session_destroy();
+    
+    // 7. Redirection vers la page d'accueil
+    return true;
 }
 
-if (isset($_COOKIE['remember_token'])) {
-    setcookie("remember_token", "", time() - 3600, "/");
+// Exécuter la déconnexion
+if (processLogout()) {
+    header("Location: ../IHM/index.php");
+    exit();
+} else {
+    // En cas d'erreur (rare mais possible)
+    header("Location: ../IHM/error.php?message=Erreur lors de la déconnexion");
+    exit();
 }
-
-$_SESSION = array();
-if (isset($_COOKIE[session_name()])) {
-    setcookie(session_name(), '', time() - 42000, '/');
-}
-session_destroy();
-
-header("Location: ../IHM/index.php");
-exit();
 ?>
