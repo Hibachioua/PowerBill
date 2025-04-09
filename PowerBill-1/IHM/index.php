@@ -1,3 +1,4 @@
+<?php include "Mise_en_page/header.php"; ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -8,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>   
-
 <!-- Hero Section -->
 <section class="hero">
     <div class="container text-center">
@@ -51,7 +51,7 @@
                 <p>Obtenez une assistance instantanée pour tout problème lié à la facturation.</p>
             </div>
             <div class="col-md-4">
-                <img src="assets/images/meterr.svg" alt="Automated Readings" class="img-fluid">
+                <img src="assets/images/meter.svg" alt="Automated Readings" class="img-fluid">
                 <h4>Relevés de Compteur Automatisés</h4>
                 <p>Recevez des mises à jour précises et en temps réel sur votre consommation d'électricité.</p>
             </div>

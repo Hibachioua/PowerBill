@@ -1,7 +1,7 @@
 <?php
 // Traitement/dashboard_traitement.php - Contrôleur pour le tableau de bord
 require_once __DIR__ . "../../BD/dashboardModel.php";
-require_once  "sidebar_controller.php";
+require_once __DIR__ . "/sidebar_controller.php";
 
 
 /**
@@ -17,7 +17,7 @@ function loadDashboardView() {
     $current_page = basename($_SERVER['PHP_SELF'], '.php');
     $current_page = str_replace('_dashboard', '', $current_page) . '_dashboard.php';
     $user_role = $_SESSION['user_role'];
-    $sidebar_data = prepareSidebarData($current_page, $user_role);
+    $sidebar_data = getSidebarData($current_page, $user_role);
     
     // 3. Récupérer les statistiques
     $stats = getDashboardStats();
