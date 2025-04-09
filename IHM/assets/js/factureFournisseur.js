@@ -17,7 +17,7 @@ class FactureController {
 
     async loadFactures() {
         try {
-            const response = await fetch('/Powerbill/Powerbill-2/PowerBill/PowerBill-1/Traitement/FactureController.php?action=getFactures');
+            const response = await fetch('../../Traitement/FactureController.php?action=getFactures');
             console.log('Response:', response); // Vérifier la réponse du fetch
             
             if (!response.ok) {
@@ -157,7 +157,7 @@ class FactureController {
         }
 
         try {
-            const response = await fetch(`/Powerbill/Powerbill-2/PowerBill/PowerBill-1/Traitement/FactureController.php?action=payerFacture&factureID=${factureID}&type=${type}`);
+            const response = await fetch(`../../Traitement/FactureController.php?action=payerFacture&factureID=${factureID}&type=${type}`);
             
             if (!response.ok) throw new Error('Erreur réseau');
             

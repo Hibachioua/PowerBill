@@ -1,5 +1,5 @@
 <?php
-require_once "connexion.php";
+require_once __DIR__ . '/connexion.php';
 
 function getConsommations($pdo) {
     $sql = "SELECT 
@@ -106,4 +106,4 @@ function genererFacture($pdo) {
         return ['success' => false, 'error' => 'Aucune donnée trouvée pour la facture'];
     }
 }
-?>
+    ?>
