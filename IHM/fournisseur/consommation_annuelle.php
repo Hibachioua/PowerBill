@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="../assets/css/consommations_annuelles_fournisseur.css">
 </head>
 <body>
-<div id="sidebar"></div>
+<?php include "../Mise_en_page/sidebar.php"; ?>
 <div class="main-content">
     <div class="content-header">
         <div>
@@ -65,9 +65,6 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/consommation_annuelle.js"></script>
-<script>
-
-</script>
 </body>
 </html>
 
