@@ -3,12 +3,6 @@
 require_once __DIR__ . "../../BD/dashboardModel.php";
 require_once __DIR__ . "/sidebar_controller.php";
 
-
-/**
- * Charge les données nécessaires pour la vue du tableau de bord
- * Cette fonction centralise toute la logique pour la vue
- * @return array Données formatées pour la vue
- */
 function loadDashboardView() {
     // 1. Vérifier les droits d'accès - seulement les fournisseurs peuvent accéder
     checkUserAccess(3);
@@ -17,7 +11,7 @@ function loadDashboardView() {
     $current_page = basename($_SERVER['PHP_SELF'], '.php');
     $current_page = str_replace('_dashboard', '', $current_page) . '_dashboard.php';
     $user_role = $_SESSION['user_role'];
-    $sidebar_data = getSidebarData($current_page, $user_role);
+    $sidebar_data = prepareSidebarData($current_page, $user_role);
     
     // 3. Récupérer les statistiques
     $stats = getDashboardStats();

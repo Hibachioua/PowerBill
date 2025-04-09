@@ -18,7 +18,7 @@ function prepareSidebarData($current_page, $user_role) {
             'icon' => 'fas fa-home',
             'label' => 'Dashboard',
             'url' => getDashboardUrl($user_role),
-            'active' => isDashboardActive($current_page)
+            'active' => ($current_page == 'fournisseur_dashboard.php')
         ],
         'history' => [
             'icon' => 'fas fa-history',
