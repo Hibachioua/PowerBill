@@ -10,7 +10,7 @@ $pdo = connectDB();
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 if (!isset($_GET['factureID']) || !is_numeric($_GET['factureID'])) {
-    header('Location: ../IHM/Client/ListeFactures.php');
+    header('Location: ../IHM/Client/view_bill.php');
     exit;
 }
 
@@ -18,7 +18,7 @@ $factureID = intval($_GET['factureID']);
 $facture = getDetailsFacture($pdo, $factureID);
 
 if (!$facture) {
-    header('Location: ../IHM/Client/ListeFactures.php');
+    header('Location: ../IHM/Client/view_bill.php');
     exit;
 }
 
