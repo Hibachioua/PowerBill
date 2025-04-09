@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 
 require_once __DIR__ . '/../BD/connexion.php';
 require_once __DIR__ . '/../BD/Factures.php';
-require_once  '/../libs/tcpdf/tcpdf.php';
+require_once __DIR__ . '/../libs/tcpdf/tcpdf.php';
 
 if (!isset($_GET['factureCompID']) || !is_numeric($_GET['factureCompID'])) {
     header("HTTP/1.1 400 Bad Request");
