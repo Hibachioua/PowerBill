@@ -2,6 +2,7 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
 require_once __DIR__ . '/../BD/connexion.php';
 require_once __DIR__ . '/../BD/Factures.php';
 require_once __DIR__ . '/../libs/tcpdf/tcpdf.php';
@@ -23,8 +24,6 @@ if (!$facture) {
 }
 
 
-
- // Calculate the invoice amounts
 $consommation = $facture['Qté_consommé'];
 $prixUnitaire = ($consommation <= 100) ? 0.82 : (($consommation <= 150) ? 0.92 : 1.1);
 $prixHT = $consommation * $prixUnitaire;

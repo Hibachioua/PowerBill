@@ -27,7 +27,7 @@ UNION ALL
 SELECT 
     fc.ID_Facture_Complementaire AS ID_Facture,
     'complementaire' AS type,
-    NULL AS Mois,                -- Ajout d'une colonne NULL pour correspondre à la structure
+    NULL AS Mois,         
     fcs.Annee,
     fc.ID_Compteur,
     cl2.Nom,
@@ -129,13 +129,6 @@ function getDetailsFacture($pdo, $factureID) {
 
     // Fetch the result as an associative array
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Log the result to a file for debugging
-    if ($result) {
-        error_log("Facture Details for ID $factureID: " . print_r($result, true), 3, 'debug_log.txt');
-    } else {
-        error_log("No data found for facture ID $factureID", 3, 'debug_log.txt');
-    }
 
     return $result;
 }
