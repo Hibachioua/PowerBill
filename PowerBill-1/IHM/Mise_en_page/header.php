@@ -48,26 +48,5 @@
         </nav>
     </header>
 </body>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-       
-        let currentLocation = window.location.pathname.split("/").pop();
 
-        
-        let menuLinks = document.querySelectorAll(".navbar-nav .nav-link");
-
-        menuLinks.forEach(link => {
-            
-            if (link.getAttribute("href") === currentLocation) {
-                link.classList.add("active");
-                link.style.color = "#4169E1"; 
-                link.style.fontWeight = "bold";
-            } else {
-                link.classList.remove("active");
-                link.style.color = ""; 
-                link.style.fontWeight = "normal";
-            }
-        });
-    });
-    </script>
 </html>
