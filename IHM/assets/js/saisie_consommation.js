@@ -67,7 +67,10 @@ async function fetchLastCounterImage(compteurId) {
 
     try {
         const response = await fetch(`../../Traitement/consommation_traitement.php?action=get_last_image&compteur_id=${compteurId}`);
-        const data = await response.json();
+        const text = await response.text();  // Get raw response
+        console.log("Response from server:", text);  // Debugging purpose
+
+        const data = JSON.parse(text); // Parse JSON manually
         
         if (!data.success) {
             throw new Error(data.error || 'Erreur de récupération');
@@ -92,6 +95,7 @@ async function fetchLastCounterImage(compteurId) {
         }
 
     } catch (error) {
+        console.error("Error fetching image:", error);
         imageContainer.innerHTML = `
             <div class="error-message">
                 <p>${error.message}</p>
@@ -100,6 +104,7 @@ async function fetchLastCounterImage(compteurId) {
         `;
     }
 }
+
 function showMessage(message, type = 'success') {
     const container = document.getElementById('messageContainer');
     container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
@@ -153,7 +158,7 @@ function afficherMessage(message, type) {
         messageDiv.style.color = "#721c24";
     }
 
-    document.body.prepend(messageDiv); // Ajoute en haut de la page
+    document.body.prepend(messageDiv); 
 }
 
 function getURLParameter(name) {
@@ -166,8 +171,6 @@ function showNotification(message) {
     
     notificationMessage.textContent = message;
     notification.style.display = 'flex';
-
-    // Cacher la notification après 10 secondes
     setTimeout(() => {
         notification.style.display = 'none';
     }, 10000);
@@ -178,7 +181,6 @@ function closeNotification() {
     notification.style.display = 'none';
 }
 
-// Vérifier s'il y a un message d'erreur dans l'URL
 const errorMessage = getURLParameter('error');
 if (errorMessage) {
     showNotification(errorMessage);

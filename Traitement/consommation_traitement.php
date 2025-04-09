@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../BD/requetes_consommation.php';
 
+// Configuration et vérifications initiales
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/error.log');
@@ -8,6 +9,7 @@ error_reporting(E_ALL);
 
 session_start();
 
+// Middleware d'authentification
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../IHM/login.php");
     exit;
@@ -38,16 +40,19 @@ try {
 
             case 'get_last_image':
                 if (!isset($_GET['compteur_id'])) {
-                    throw new Exception('Paramètre manquant');
+                    throw new Exception('Paramètre compteur_id manquant');
                 }
+        
                 $compteurId = (int)$_GET['compteur_id'];
                 if ($compteurId <= 0) {
                     throw new Exception('ID invalide');
                 }
+        
                 $imageData = getLastCounterImage($compteurId);
                 if (!$imageData['success']) {
                     throw new Exception($imageData['error']);
                 }
+        
                 echo json_encode([
                     'success' => true,
                     'image_url' => $imageData['image_url'],
@@ -57,13 +62,13 @@ try {
         }
     }
 
+    // Gestion des requêtes POST
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
-            // Vérification de la date
-            // $today = date('j'); // Jour du mois (1-31)
-            // if ($today != 18) {
-            //     throw new Exception("L'insertion n'est autorisée que le 18 de chaque mois.");
-            // }
+            /*$today = date('j'); 
+            if ($today != 18) {
+                throw new Exception("L'insertion n'est autorisée que le 18 de chaque mois.");
+            }*/
 
             $ID_Compteur = filter_input(INPUT_POST, 'ID_Compteur', FILTER_VALIDATE_INT);
             $Mois = date('n');
@@ -124,6 +129,6 @@ try {
         unlink($destination);
     }
     $_SESSION['error'] = $e->getMessage();
-    header("Location: ../IHM/saisie_consommation.php");
+    header("Location: ../IHM/Client/saisie_consommation.php");
     exit;
 }
