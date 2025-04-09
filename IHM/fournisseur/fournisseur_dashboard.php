@@ -187,7 +187,7 @@ extract($viewData);
                     <div class="stat-card-info">
                         <h5>Clients Total</h5>
                         <h2><?php echo $stats['total_clients']; ?></h2>
-                        <p class="text-success"><i class="fas fa-arrow-up"></i> +12% ce mois</p>
+                        
                     </div>
                 </div>
             </div>
@@ -200,7 +200,6 @@ extract($viewData);
                     <div class="stat-card-info">
                         <h5>Réclamations</h5>
                         <h2><?php echo $stats['total_complaints']; ?></h2>
-                        <p class="text-danger"><i class="fas fa-arrow-up"></i> +5% ce mois</p>
                     </div>
                 </div>
             </div>
@@ -213,7 +212,6 @@ extract($viewData);
                     <div class="stat-card-info">
                         <h5>Consommations Anomalies</h5>
                         <h2><?php echo $stats['anomaly_consumptions']; ?></h2>
-                        <p class="text-success"><i class="fas fa-arrow-down"></i> -3% ce mois</p>
                     </div>
                 </div>
             </div>
@@ -226,7 +224,6 @@ extract($viewData);
                     <div class="stat-card-info">
                         <h5>Revenu Mensuel</h5>
                         <h2><?php echo number_format($stats['monthly_revenue']); ?> DH</h2>
-                        <p class="text-success"><i class="fas fa-arrow-up"></i> +8% ce mois</p>
                     </div>
                 </div>
             </div>
