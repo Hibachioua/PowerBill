@@ -109,10 +109,10 @@ try {
 
             if ($resultat['success']) {
                 if (isset($resultat['factureID'])) {
-                    header("Location: ../IHM/ListeFactures.php?message=" . urlencode("Consommation ajoutée avec succès"));
+                    header("Location: ../IHM/Client/view_bill.php?message=" . urlencode("Consommation ajoutée avec succès"));
                     exit;
                 } else {
-                    header("Location: ../IHM/ListeFactures.php?message=" . urlencode("Consommation ajoutée avec succès mais à vérifier par le fournisseur"));
+                    header("Location: ../IHM/Client/view_bill.php?message=" . urlencode("Consommation ajoutée avec succès mais à vérifier par le fournisseur"));
                     exit;
                 }
             } else {

@@ -100,3 +100,29 @@ if (facture) {
     chargerFactures();
     setInterval(chargerFactures, 5000);
 });
+function showNotification(message) {
+    const notification = document.getElementById('notification');
+    const notificationMessage = document.getElementById('notification-message');
+    
+    notificationMessage.textContent = message;
+    notification.style.display = 'flex';
+
+    // Cacher la notification après 10 secondes
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 10000);
+}
+
+function closeNotification() {
+    const notification = document.getElementById('notification');
+    notification.style.display = 'none';
+}
+
+// Vérifier si un message est passé dans l'URL
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
+    if (message) {
+        showNotification(decodeURIComponent(message));
+    }
+});

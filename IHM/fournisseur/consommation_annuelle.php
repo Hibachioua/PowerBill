@@ -1,3 +1,7 @@
+<?php
+require_once "../../Traitement/auth_check.php";
+require_once "../../Traitement/dashboard_traitement.php";
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>

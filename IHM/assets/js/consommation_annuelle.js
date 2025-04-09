@@ -17,10 +17,13 @@ class ConsommationController {
             const response = await fetch('../../Traitement/consommation_annuelle_controller.php?action=getConsommations');
             this.data = await response.json();
             this.filteredData = [...this.data];
+            
+            // Mettre à jour les options d'année dynamiquement
             this.updateYearFilter();
+            
             this.renderTable();
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Erreur:', error);
         }
     }
 
@@ -28,9 +31,9 @@ class ConsommationController {
         const yearSelect = $('#filterYear');
         yearSelect.empty().append('<option value="all">Toutes</option>');
         
-        // Get all unique years
+        // Récupérer toutes les années uniques
         const years = [...new Set(this.data.map(item => item.Annee))]
-                     .sort((a, b) => b - a); // Sort in descending order
+                     .sort((a, b) => b - a); // Tri décroissant
                      
         years.forEach(year => {
             yearSelect.append(`<option value="${year}">${year}</option>`);
@@ -72,7 +75,7 @@ class ConsommationController {
     }
 
     initFactureButtons() {
-        $('.btn-generer').off('click').on('click', (e) => {
+        $('.btn-generer').on('click', (e) => {
             const target = e.currentTarget;
             this.genererFacture(target.dataset);
         });
@@ -94,7 +97,7 @@ class ConsommationController {
                 throw new Error(result.error || 'Erreur inconnue');
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Erreur:', error);
             alert(`Échec de la génération: ${error.message}`);
         }
     }
@@ -104,7 +107,7 @@ class ConsommationController {
         const yearFilter = $('#filterYear').val();
 
         this.filteredData = this.data.filter(item => {
-            // Concatenate all visible data
+            // Concaténation de toutes les données visibles
             const rowContent = `
                 ${item.Annee}
                 ${item.ID_Client}
@@ -132,30 +135,6 @@ class ConsommationController {
     }
 }
 
-async function loadSidebar() {
-    try {
-        const response = await fetch("../Mise_en_page/sidebar.php");
-        const sidebarContent = await response.text();
-        document.getElementById('sidebar').innerHTML = sidebarContent;
-    } catch (error) {
-        console.error('Error loading sidebar:', error);
-    }
-}
-
-async function checkUserAccess() {
-    try {
-        const response = await fetch('../../Traitement/auth_check.php');
-        const data = await response.json();
-        if (!data.isAuthorized) {
-            window.location.href = '/login'; // Redirect to login if not authorized
-        }
-    } catch (error) {
-        console.error('Error checking user access:', error);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    loadSidebar();
-    checkUserAccess();
+$(document).ready(() => {
     new ConsommationController();
 });

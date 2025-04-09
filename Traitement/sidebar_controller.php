@@ -77,7 +77,8 @@ function isDashboardActive($current_page) {
         'dashboard.php',
         'client_dashboard.php',
         'agent_dashboard.php',
-        'fournisseur_dashboard.php'
+        'fournisseur_dashboard.php',
+        'consommation_annuelle.php'
     ]);
 }
 
@@ -93,6 +94,7 @@ function getDashboardUrl($user_role) {
         case 2: return 'agent_dashboard.php';
         case 3: return 'fournisseur_dashboard.php';
         default: return 'dashboard.php';
+
     }
 }
 

@@ -13,7 +13,6 @@
 </head>
 <body>
 <?php include __DIR__ . "/../Mise_en_page/header_client.php"; ?>
-
 <div class="containerListe">
         <div class="title">
             <h2>Vos Factures</h2>
@@ -77,8 +76,6 @@
     </div>
 </div>
 
-
-        <!-- Tableau des factures -->
         <div class="table-container">
             <table>
                 <thead>
