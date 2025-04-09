@@ -1,12 +1,14 @@
 <?php
 function connectDB() {
-    $host = 'localhost';
-    $dbname = 'powerbill';
-    $username = 'root'; 
-    $password = ''; 
+    $serveur       = "localhost";
+    $port          = "3307"; 
+    $utilisateur   = "root";
+    $motdepasse    = "";
+    $basededonnees = "powerbill";
 
     try {
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);        $pdo->exec("set names utf8");
+        $pdo = new PDO("mysql:host=$serveur;port=$port;dbname=$basededonnees", $utilisateur, $motdepasse);
+        $pdo->exec("set names utf8");
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $pdo;
     } catch (PDOException $e) {
