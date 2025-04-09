@@ -56,13 +56,13 @@ try {
                 <td>${anomalie.Consommation_precedent} kWh</td>
                 <td>
                     ${anomalie.Image_precedent 
-                        ? `<img src="../${anomalie.Image_precedent}" class="compteur-img" alt="Compteur précédent">`
+                        ? `<img src="../../${anomalie.Image_precedent}" class="compteur-img" alt="Compteur précédent">`
                         : 'N/A'}
                 </td>
                 <td>${anomalie.Consommation_actuelle} kWh</td>
                 <td>
                     ${anomalie.Image_actuelle 
-                        ? `<img src="../${anomalie.Image_actuelle}" class="compteur-img" alt="Compteur actuel">`
+                        ? `<img src="../../${anomalie.Image_actuelle}" class="compteur-img" alt="Compteur actuel">`
                         : 'N/A'}
                 </td>
                 <td>

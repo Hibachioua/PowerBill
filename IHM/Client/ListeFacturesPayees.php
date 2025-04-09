@@ -88,6 +88,7 @@
                         <th>Date de Facturation</th>
                         <th>Consommation</th>
                         <th>Montant</th>
+                        <th>État</th>
                         <th>Action</th>
                     </tr>
                 </thead>

@@ -1,5 +1,6 @@
 <?php
 require_once '../BD/connexion.php';
+require_once '../BD/fournisseur_cons_annuelle.php'; 
 
 $pdo = connectDB();
 header('Content-Type: application/json');
@@ -25,4 +26,6 @@ try {
     http_response_code(400);
     echo json_encode(['error' => $e->getMessage()]);
 }
+
+
 

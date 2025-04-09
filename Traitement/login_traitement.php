@@ -9,7 +9,7 @@ function getRedirectPath($roleId) {
         case 1: // Client
             return '../IHM/Client/client_dashboard.php';
         case 2: // Agent
-            return '../IHM/agent_dashboard.php';
+            return '../IHM/agent/agent_dashboard.php';
         case 3: // Fournisseur
             return '../IHM/fournisseur/fournisseur_dashboard.php';
         default:
