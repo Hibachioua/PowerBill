@@ -72,7 +72,7 @@ try {
             break;
         
         case 'retour':
-                header('Location: ../IHM/Client/ListeFactures.php');
+                header('Location: ../IHM/Client/view_bill.php');
                 exit();
                 break;
 
