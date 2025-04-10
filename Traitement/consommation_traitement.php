@@ -65,10 +65,10 @@ try {
     // Gestion des requêtes POST
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
-            /*$today = date('j'); 
+            $today = date('j'); 
             if ($today != 18) {
                 throw new Exception("L'insertion n'est autorisée que le 18 de chaque mois.");
-            }*/
+            }
 
             $ID_Compteur = filter_input(INPUT_POST, 'ID_Compteur', FILTER_VALIDATE_INT);
             $Mois = date('n');

@@ -4,8 +4,6 @@ class FactureController {
         this.initEventListeners();
         this.loadFactures();
         
-        // Rafraîchir toutes les 5 secondes
-        setInterval(() => this.loadFactures(), 5000);
     }
 
     initEventListeners() {

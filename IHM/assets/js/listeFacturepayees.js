@@ -94,7 +94,7 @@ if (facture) {
 
     // Charger les factures au démarrage et toutes les 30 secondes
     chargerFactures();
-    setInterval(chargerFactures, 5000);
+   
 
 
             // Gérer le bouton Retour
