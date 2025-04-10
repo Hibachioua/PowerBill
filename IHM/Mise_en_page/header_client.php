@@ -21,9 +21,6 @@
                     </li>
                     
                     <li class="nav-item">
-                        <a class="nav-link" href="profile.php">Profile</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="view_bill.php">View Bill</a>
                     </li>
                     <li class="nav-item">
