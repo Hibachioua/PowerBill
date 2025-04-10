@@ -81,7 +81,6 @@
                             <th>Période</th>
                             <th>Compteur</th>
                             <th>Consommation</th>
-                            <th>Image</th>
                             <th>Statut</th>
                         </tr>
                     </thead>

@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderTable(data) {
         const tableBody = document.getElementById('tableBody');
         tableBody.innerHTML = '';
-        
+    
         if (data.consommations.length === 0) {
             document.getElementById('alert-container').innerHTML = `
                 <div class="alert alert-info">
@@ -194,15 +194,15 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelector('.pagination-container').style.display = 'none';
             return;
         }
-        
+    
         document.getElementById('alert-container').innerHTML = '';
         document.querySelector('.table-responsive').style.display = 'block';
         document.querySelector('.pagination-container').style.display = 'flex';
-        
+    
         // Remplir les lignes du tableau
         data.consommations.forEach(conso => {
             const row = document.createElement('tr');
-            
+    
             row.innerHTML = `
                 <td>${conso.ID_Consommation}</td>
                 <td>${escapeHtml(conso.Nom)} ${escapeHtml(conso.Prenom)}</td>
@@ -212,14 +212,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${conso.ID_Compteur}</td>
                 <td>${conso.Qté_consommé} kWh</td>
                 <td>
-                    ${conso.Image_Compteur ? 
-                        `<img src="../../IHM/assets/images/meter.jpg" alt="Compteur" class="image-preview" 
-                         data-bs-toggle="modal" data-bs-target="#imageModal" 
-                         data-title="Compteur #${conso.ID_Compteur}" 
-                         data-image="../../IHM/assets/images/meter.jpg">` : 
-                        '<span class="text-muted">Non disponible</span>'}
-                </td>
-                <td>
                     ${conso.status === "pas d'anomalie" ? 
                         '<span class="status-badge status-normal">Normal</span>' : 
                         '<span class="status-badge status-anomalie">Anomalie</span>'}
@@ -228,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             tableBody.appendChild(row);
         });
-        
+    
         // Pagination simplifiée (statique pour cet exemple)
         document.getElementById('pagination').innerHTML = `
             <li class="page-item disabled">
@@ -242,6 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </li>
         `;
     }
+    
     
     // Fonction pour échapper les caractères HTML (sécurité)
     function escapeHtml(text) {
